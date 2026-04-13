@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDOR Writeups & Reports - Full Roadmap</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <!-- Page styles → src/css/ -->
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+
+<div class="wrap">
+    <a href="checklist.html" class="back-btn anim d0">&nbsp;BACK TO CHECKLIST</a>
+
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / IDOR WRITEUPS</span>
+        <span class="topbar-status"><span class="status-dot"></span>ACTIVE</span>
+    </div>
+
+    <div class="hero anim d1">
+        <div class="hero-eyebrow">Bug Bounty</div>
+        <h1 class="hero-h1">IDOR <em>WRITEUPS</em></h1>
+        <p class="hero-sub">// Document your bug bounty findings and track submissions</p>
+    </div>
+
+    <div class="stats-bar anim d2">
+        <div class="stat-pill sp-total"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-pill sp-done"><div class="stat-val" id="statDone">0</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-pill sp-pending"><div class="stat-val" id="statPending">0</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-pill sp-high"><div class="stat-val" id="statHigh">0</div><div class="stat-lbl">High Priority</div></div>
+    </div>
+
+    <div class="form-card anim d2">
+        <div class="form-card-title">Add New Writeup</div>
+        <div class="form-grid">
+            <div class="form-full field-wrap">
+                <label class="field-label">Title</label>
+                <input class="field-input" type="text" id="writeupTitle" placeholder="e.g., IDOR in User Profile API">
+            </div>
+            <div class="form-full field-wrap">
+                <label class="field-label">Link (Optional)</label>
+                <input class="field-input" type="url" id="writeupLink" placeholder="https://example.com">
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Priority</label>
+                <select class="field-input" id="writeupPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Date</label>
+                <input class="field-input" type="date" id="writeupDate">
+            </div>
+        </div>
+        <button class="add-btn" onclick="addWriteup()">＋ Add Writeup</button>
+    </div>
+
+    <div class="sh anim d3">
+        <div class="sh-left">
+            <div class="sh-icon">📝</div>
+            <div class="sh-labels">
+                <span class="sh-text">Writeups</span>
+                <span class="sh-sub">Sorted by date</span>
+            </div>
+        </div>
+        <div class="sh-right">
+            <span class="sh-dot"></span>
+            <span class="sh-count" id="listCount">0 items</span>
+        </div>
+    </div>
+    <div class="writeups-list anim d3" id="writeupsList"></div>
+
+    <div class="foot">
+        <span class="foot-l">// LEARNING OS — IDOR Writeups & Reports</span>
+        <span class="foot-r" id="footStr">0 / 0 completed</span>
+    </div>
+</div>
+
+<script>
+    const get  = () => JSON.parse(localStorage.getItem('idorWriteups') || '[]');
+    const save = w => localStorage.setItem('idorWriteups', JSON.stringify(w));
+
+    function addWriteup() {
+        const title    = document.getElementById('writeupTitle').value.trim();
+        const link     = document.getElementById('writeupLink').value.trim();
+        const priority = document.getElementById('writeupPriority').value;
+        const date     = document.getElementById('writeupDate').value;
+        if (!title) { alert('Please enter a title'); return; }
+        if (!date)  { alert('Please select a date');  return; }
+        const w = get();
+        w.push({ id: Date.now(), title, link, priority, date, completed: false, createdAt: new Date().toISOString() });
+        save(w);
+        document.getElementById('writeupTitle').value    = '';
+        document.getElementById('writeupLink').value     = '';
+        document.getElementById('writeupPriority').value = 'medium';
+        document.getElementById('writeupDate').value     = '';
+        renderAll(w);
+    }
+
+    function toggleWriteup(id) {
+        const w = get(), item = w.find(x => x.id === id);
+        if (item) { item.completed = !item.completed; save(w); renderAll(w); }
+    }
+
+    function deleteWriteup(id) {
+        if (!confirm('Delete this writeup?')) return;
+        const filtered = get().filter(x => x.id !== id);
+        save(filtered); renderAll(filtered);
+    }
+
+    function editWriteup(id) {
+        const w = get(), item = w.find(x => x.id === id);
+        if (item) {
+            document.getElementById('writeupTitle').value    = item.title;
+            document.getElementById('writeupLink').value     = item.link || '';
+            document.getElementById('writeupPriority').value = item.priority;
+            document.getElementById('writeupDate').value     = item.date;
+            const filtered = w.filter(x => x.id !== id);
+            save(filtered); renderAll(filtered);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function renderAll(writeups) {
+        const total   = writeups.length;
+        const done    = writeups.filter(w => w.completed).length;
+        document.getElementById('statTotal').textContent   = total;
+        document.getElementById('statDone').textContent    = done;
+        document.getElementById('statPending').textContent = total - done;
+        document.getElementById('statHigh').textContent    = writeups.filter(w => w.priority === 'high' && !w.completed).length;
+        document.getElementById('listCount').textContent   = `${total} item${total !== 1 ? 's' : ''}`;
+        document.getElementById('footStr').textContent     = `${done} / ${total} completed`;
+
+        const container = document.getElementById('writeupsList');
+        if (!total) {
+            container.innerHTML = `<div class="empty-state"><span class="empty-icon">📝</span><div class="empty-title">No writeups yet</div><div class="empty-sub">Add your first bug writeup above to start tracking your findings</div></div>`;
+            return;
+        }
+        const sorted = [...writeups].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const slabIcon = {high:'🔴',medium:'🟡',low:'🔵'};
+        container.innerHTML = sorted.map(w => `
+            <div class="writeup-item p-${w.priority} ${w.completed ? 'completed' : ''}">
+                <div class="writeup-slab">${slabIcon[w.priority]||'🔵'}</div>
+                <div class="writeup-body">
+                    <div class="writeup-info">
+                        <div class="writeup-title">${w.title}</div>
+                        <div class="writeup-meta">
+                            ${w.link ? `<a href="${w.link}" target="_blank" class="writeup-link">🔗 ${w.link}</a>` : ''}
+                            <div class="meta-pill">📅 ${formatDate(w.date)}</div>
+                            <span class="pbadge pbadge-${w.priority}">${w.priority.toUpperCase()}</span>
+                            ${w.completed ? `<div class="meta-pill" style="color:var(--cyan);border-color:rgba(0,229,255,.3)">✓ DONE</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="writeup-footer">
+                    <button class="action-btn complete-btn" onclick="toggleWriteup(${w.id})">${w.completed ? '↩ Undo' : '✓ Done'}</button>
+                    <button class="action-btn delete-btn" onclick="deleteWriteup(${w.id})">✕ Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatDate(d) {
+        return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('writeupDate').valueAsDate = new Date();
+        renderAll(get());
+    });
+</script>
+
+<!-- Shared scripts -->
+<script src="../js/data.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/ui.js"></script>
+</body>
+</html>

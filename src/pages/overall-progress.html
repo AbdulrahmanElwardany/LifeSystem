@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overall Progress</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <!-- Page styles → src/css/ -->
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+    <!-- Back -->
+    <a href="index.html" class="back-btn"> &nbsp;BACK TO HOME</a>
+
+    <!-- Top bar -->
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / DASHBOARD</span>
+        <span class="topbar-status"><span class="status-dot"></span>TRACKING ACTIVE</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero anim d1">
+        <div class="hero-left">
+            <div class="hero-eyebrow">Your Learning Journey</div>
+            <h1 class="hero-h1">OVERALL<br><em>PROGRESS</em></h1>
+            <p class="hero-sub">// Real-time tracking across all<br>courses, modules, and milestones.<br>Keep pushing forward.</p>
+        </div>
+
+        <!-- Big ring -->
+        <div class="ring-wrap">
+            <svg viewBox="0 0 280 280">
+                <defs>
+                    <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%"   stop-color="#00ff88"/>
+                        <stop offset="100%" stop-color="#00e5ff"/>
+                    </linearGradient>
+                </defs>
+                <!-- Outer tick ring -->
+                <circle class="ring-tick" cx="140" cy="140" r="128" stroke-dasharray="3 9"/>
+                <!-- Track -->
+                <circle class="ring-track" cx="140" cy="140" r="118"/>
+                <!-- Progress -->
+                <circle class="ring-prog" id="ringProg" cx="140" cy="140" r="118"/>
+            </svg>
+            <div class="ring-inner">
+                <div class="ring-pct" id="ringPct">0%</div>
+                <div class="ring-label">Completed</div>
+                <div class="ring-sub" id="ringCount">— / —</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar anim d2">
+        <div class="stat-box">
+            <div class="stat-num" id="sDone">0</div>
+            <div class="stat-lbl">Lessons Done</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="sTotal">132</div>
+            <div class="stat-lbl">Total Lessons</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num">3</div>
+            <div class="stat-lbl">Courses</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="sRemain">—</div>
+            <div class="stat-lbl">Remaining</div>
+        </div>
+    </div>
+
+    <!-- Courses heading -->
+    <div class="courses-heading anim d3">
+        <span class="courses-heading-text">Active Courses</span>
+        <div class="courses-heading-line"></div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-grid">
+
+        <!-- Bug Bounty Hunter -->
+        <div class="card card-g anim d3">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 01</div>
+            <div class="card-icon">🎯</div>
+            <div class="card-title">Web Pentestion Level 1</div>
+            <div class="card-meta">93 lessons &nbsp;·&nbsp; 10 sections</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="bbArc" cx="26" cy="26" r="20" fill="none" stroke="#00ff88" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.5s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="bbPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="bbDone">0</span> / 93 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="bbSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="bbAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="bbNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('bb')">Set</button>
+            </div>
+            <a href="bug-bounty-roadmap.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- OWASP Top 10 -->
+        <div class="card card-c anim d4">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 02</div>
+            <div class="card-icon">🔒</div>
+            <div class="card-title">OWASP Top 10</div>
+            <div class="card-meta">20 vulnerabilities &nbsp;·&nbsp; 2 categories</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="owArc" cx="26" cy="26" r="20" fill="none" stroke="#00e5ff" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.6s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="owPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="owDone">0</span> / 20 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="owSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="owAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="owNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('ow')">Set</button>
+            </div>
+            <a href="learning-bugs.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- Graduation Project -->
+        <div class="card card-p anim d5">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 03</div>
+            <div class="card-icon">🎓</div>
+            <div class="card-title">Graduation Project</div>
+            <div class="card-meta">19 lessons &nbsp;·&nbsp; 3 sections</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="grArc" cx="26" cy="26" r="20" fill="none" stroke="#9b5de5" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.7s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="grPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="grDone">0</span> / 19 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="grSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="grAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="grNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('gr')">Set</button>
+            </div>
+            <a href="automation-roadmap.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="foot anim d5">
+        <span class="foot-l">// keep learning, keep growing 🚀</span>
+        <span class="foot-r" id="footStr">loading...</span>
+    </div>
+
+</div>
+
+<!-- ── Assign Popover ── -->
+<div class="popover-overlay" id="popoverOverlay" onclick="closePopoverOnBg(event)">
+    <div class="popover-box">
+        <button class="popover-close" onclick="closePopover()">×</button>
+        <div class="popover-course-tag" id="popoverTag">Course</div>
+        <div class="popover-title" id="popoverTitle">Assign Person</div>
+        <div class="popover-avatar-preview" id="popoverAvatarPreview">?</div>
+        <label class="popover-input-label">Instructor name</label>
+        <input class="popover-input" id="popoverInput" type="text" placeholder="e.g. Dr. Ahmed Karim" maxlength="30" spellcheck="false" autocomplete="off"/>
+        <div class="popover-actions">
+            <button class="popover-save" id="popoverSave" onclick="saveAssignee()">Save</button>
+            <button class="popover-clear" onclick="clearAssignee()">Clear</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ── Graduation lesson defaults ───────────────────────── */
+    const GRAD_LESSONS = {
+        'intro-course-structure':'done','basics-setup':'done','basics-syntax1':'done',
+        'basics-syntax2':'done','basics-files':'done','basics-http':'done',
+        'basics-concurrency':'done','basics-logging':'done','basics-flags':'done',
+        'basics-project':'done','basics-packages':'done','basics-regex':'start',
+        'assets-concepts':'done','assets-whois':'done','assets-domain':'start',
+        'assets-dns':'start','assets-subdomain':'start'
+    };
+
+    /* ── Helpers ───────────────────────────────────────────── */
+    function animNum(el, to, decimals) {
+        const start = Date.now(), dur = 1200, from = 0;
+        const run = () => {
+            const p = Math.min((Date.now()-start)/dur, 1);
+            const ease = 1 - Math.pow(1-p, 3);
+            el.textContent = (from + (to-from)*ease).toFixed(decimals||0);
+            if (p < 1) requestAnimationFrame(run);
+        };
+        requestAnimationFrame(run);
+    }
+
+    function setMiniArc(arcEl, pct) {
+        const c = 125.66;
+        arcEl.style.strokeDashoffset = c - (pct/100)*c;
+    }
+
+    function buildSegs(container, total, done, cls) {
+        container.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+            const s = document.createElement('div');
+            s.className = 'seg' + (i < done ? ' ' + cls : '');
+            container.appendChild(s);
+        }
+    }
+
+    /* ── Big ring ──────────────────────────────────────────── */
+    function setRing(pct, done, total) {
+        const circ = 2 * Math.PI * 118; // 741.12
+        document.getElementById('ringProg').style.strokeDasharray  = circ;
+        document.getElementById('ringProg').style.strokeDashoffset = circ - (pct/100)*circ;
+        animNum(document.getElementById('ringPct'), pct, 0);
+        // workaround: update text after animation starts
+        setTimeout(() => {
+            document.getElementById('ringPct').textContent = Math.round(pct) + '%';
+        }, 1250);
+        document.getElementById('ringCount').textContent = `${done} / ${total}`;
+    }
+
+    /* ── Main ──────────────────────────────────────────────── */
+    function loadProgress() {
+        // Bug Bounty
+        const bbSaved = localStorage.getItem('bugBountyProgress');
+        const bbDone  = bbSaved ? JSON.parse(bbSaved).length : 0;
+        const bbTotal = 93;
+        const bbPct   = Math.round((bbDone/bbTotal)*100);
+
+        // OWASP
+        const owSaved = localStorage.getItem('learningBugsProgress');
+        const owDone  = owSaved ? JSON.parse(owSaved).length : 0;
+        const owTotal = 20;
+        const owPct   = Math.round((owDone/owTotal)*100);
+
+        // Graduation
+        const grSaved = localStorage.getItem('graduationProgress');
+        const grState = grSaved ? JSON.parse(grSaved) : GRAD_LESSONS;
+        const grDone  = Object.values(grState).filter(v=>v==='done').length;
+        const grTotal = Object.keys(GRAD_LESSONS).length;
+        const grPct   = Math.round((grDone/grTotal)*100);
+
+        // Totals
+        const totalDone  = bbDone + owDone + grDone;
+        const totalItems = bbTotal + owTotal + grTotal;
+        const totalPct   = Math.round((totalDone/totalItems)*100);
+
+        /* ── Update Bug Bounty card ── */
+        document.getElementById('bbPct').textContent  = bbPct;
+        document.getElementById('bbDone').textContent = bbDone;
+        setTimeout(() => setMiniArc(document.getElementById('bbArc'), bbPct), 300);
+        buildSegs(document.getElementById('bbSegs'), Math.min(bbTotal,20), Math.round((bbDone/bbTotal)*20), 'filled-g');
+
+        /* ── Update OWASP card ── */
+        document.getElementById('owPct').textContent  = owPct;
+        document.getElementById('owDone').textContent = owDone;
+        setTimeout(() => setMiniArc(document.getElementById('owArc'), owPct), 400);
+        buildSegs(document.getElementById('owSegs'), owTotal, owDone, 'filled-c');
+
+        /* ── Update Graduation card ── */
+        document.getElementById('grPct').textContent  = grPct;
+        document.getElementById('grDone').textContent = grDone;
+        setTimeout(() => setMiniArc(document.getElementById('grArc'), grPct), 500);
+        buildSegs(document.getElementById('grSegs'), grTotal, grDone, 'filled-p');
+
+        /* ── Stats bar ── */
+        setTimeout(() => {
+            animNum(document.getElementById('sDone'),   totalDone);
+            animNum(document.getElementById('sTotal'),  totalItems);
+            animNum(document.getElementById('sRemain'), totalItems - totalDone);
+        }, 200);
+
+        /* ── Ring ── */
+        setTimeout(() => setRing(totalPct, totalDone, totalItems), 300);
+
+        /* ── Footer ── */
+        document.getElementById('footStr').textContent =
+            `${totalDone} of ${totalItems} lessons completed · ${totalPct}%`;
+
+        /* ── Assignees ── */
+        initAssignees();
+    }
+
+    /* ── Assignee config ───────────────────────────────────── */
+    const COURSE_META = {
+        bb: { tag: 'Course — 01', title: 'Bug Bounty Hunter',   accent: '#00ff88', accentBg: 'rgba(0,255,136,0.12)',   accentBorder: 'rgba(0,255,136,0.35)',   saveBg: 'linear-gradient(135deg,#00ff88,#00d4ff)', saveColor: '#05050f' },
+        ow: { tag: 'Course — 02', title: 'OWASP Top 10',        accent: '#00e5ff', accentBg: 'rgba(0,229,255,0.12)',   accentBorder: 'rgba(0,229,255,0.35)',   saveBg: 'linear-gradient(135deg,#00e5ff,#7b2cbf)', saveColor: '#05050f' },
+        gr: { tag: 'Course — 03', title: 'Graduation Project',  accent: '#9b5de5', accentBg: 'rgba(155,93,229,0.15)', accentBorder: 'rgba(155,93,229,0.4)',   saveBg: 'linear-gradient(135deg,#9b5de5,#ec4899)', saveColor: '#fff'    },
+    };
+
+    let activeKey = null;
+
+    function getInitials(name) {
+        if (!name || !name.trim()) return '?';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function renderAssignee(key) {
+        const name   = localStorage.getItem('assignee_' + key) || '';
+        const meta   = COURSE_META[key];
+        const initials = getInitials(name);
+
+        const avatar  = document.getElementById(key + 'Avatar');
+        const display = document.getElementById(key + 'NameDisplay');
+        const btn     = avatar.closest('.assignee-row').querySelector('.assign-btn');
+
+        avatar.textContent   = initials;
+        avatar.style.background   = meta.accentBg;
+        avatar.style.color        = meta.accent;
+        avatar.style.borderColor  = meta.accentBorder;
+
+        if (name.trim()) {
+            display.textContent  = name.trim();
+            display.className    = 'assignee-name-display';
+            btn.textContent      = 'Change';
+        } else {
+            display.textContent  = 'Not set';
+            display.className    = 'assignee-name-display empty';
+            btn.textContent      = 'Set';
+        }
+    }
+
+    function openPopover(key) {
+        activeKey = key;
+        const meta    = COURSE_META[key];
+        const saved   = localStorage.getItem('assignee_' + key) || '';
+        const overlay = document.getElementById('popoverOverlay');
+        const input   = document.getElementById('popoverInput');
+        const preview = document.getElementById('popoverAvatarPreview');
+        const saveBtn = document.getElementById('popoverSave');
+
+        document.getElementById('popoverTag').textContent   = meta.tag;
+        document.getElementById('popoverTitle').textContent = 'Set Instructor';
+
+        preview.style.background   = meta.accentBg;
+        preview.style.color        = meta.accent;
+        preview.style.borderColor  = meta.accentBorder;
+        preview.textContent        = getInitials(saved);
+
+        saveBtn.style.background = meta.saveBg;
+        saveBtn.style.color      = meta.saveColor;
+
+        input.value = saved;
+
+        overlay.classList.add('open');
+        setTimeout(() => input.focus(), 120);
+
+        // Live preview initials
+        input.oninput = () => {
+            preview.textContent = getInitials(input.value);
+        };
+
+        // Enter to save
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') saveAssignee();
+            if (e.key === 'Escape') closePopover();
+        };
+    }
+
+    function closePopover() {
+        document.getElementById('popoverOverlay').classList.remove('open');
+        activeKey = null;
+    }
+
+    function closePopoverOnBg(e) {
+        if (e.target === document.getElementById('popoverOverlay')) closePopover();
+    }
+
+    function saveAssignee() {
+        if (!activeKey) return;
+        const name = document.getElementById('popoverInput').value.trim();
+        localStorage.setItem('assignee_' + activeKey, name);
+        renderAssignee(activeKey);
+        closePopover();
+    }
+
+    function clearAssignee() {
+        if (!activeKey) return;
+        localStorage.removeItem('assignee_' + activeKey);
+        renderAssignee(activeKey);
+        closePopover();
+    }
+
+    function initAssignees() {
+        ['bb','ow','gr'].forEach(renderAssignee);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProgress);
+</script>
+
+<!-- Shared scripts -->
+<script src="../js/data.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/ui.js"></script>
+</body>
+</html>

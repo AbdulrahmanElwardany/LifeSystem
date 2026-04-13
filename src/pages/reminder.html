@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder - Full Roadmap</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <!-- Page styles → src/css/ -->
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+
+<div class="wrap">
+    <a href="checklist.html" class="back-btn anim d0">&nbsp;BACK TO CHECKLIST</a>
+
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / REMINDERS</span>
+        <span class="topbar-status"><span class="status-dot"></span>ACTIVE</span>
+    </div>
+
+    <div class="hero anim d1">
+        <div class="hero-eyebrow">Stay on Track</div>
+        <h1 class="hero-h1">REMIND<em>ERS</em></h1>
+        <p class="hero-sub">// Stay on top of your tasks and deadlines</p>
+    </div>
+
+    <div class="stats-bar anim d2">
+        <div class="stat-pill sp-total"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-pill sp-done"><div class="stat-val" id="statDone">0</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-pill sp-pending"><div class="stat-val" id="statPending">0</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-pill sp-high"><div class="stat-val" id="statHigh">0</div><div class="stat-lbl">High Priority</div></div>
+    </div>
+
+    <div class="form-card anim d2">
+        <div class="form-card-title">Add New Reminder</div>
+        <div class="form-grid">
+            <div class="form-full field-wrap">
+                <label class="field-label">Title</label>
+                <input class="field-input" type="text" id="reminderTitle" placeholder="Enter reminder title...">
+            </div>
+            <div class="form-full field-wrap">
+                <label class="field-label">Link (Optional)</label>
+                <input class="field-input" type="url" id="reminderLink" placeholder="https://example.com">
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Date</label>
+                <input class="field-input" type="date" id="reminderDate">
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Priority</label>
+                <select class="field-input" id="reminderPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+        </div>
+        <button class="add-btn" onclick="addReminder()">＋ Add Reminder</button>
+    </div>
+
+    <div class="sh anim d3">
+        <div class="sh-left">
+            <div class="sh-icon">🔔</div>
+            <div class="sh-labels">
+                <span class="sh-text">Reminders</span>
+                <span class="sh-sub">Sorted by date</span>
+            </div>
+        </div>
+        <div class="sh-right">
+            <span class="sh-dot"></span>
+            <span class="sh-count" id="listCount">0 items</span>
+        </div>
+    </div>
+    <div class="reminders-list anim d3" id="remindersList"></div>
+
+    <div class="foot">
+        <span class="foot-l">// LEARNING OS — Reminders Module</span>
+        <span class="foot-r" id="footStr">0 / 0 completed</span>
+    </div>
+</div>
+
+<script>
+    const get = () => JSON.parse(localStorage.getItem('reminders') || '[]');
+    const save = r => localStorage.setItem('reminders', JSON.stringify(r));
+
+    function addReminder() {
+        const title    = document.getElementById('reminderTitle').value.trim();
+        const link     = document.getElementById('reminderLink').value.trim();
+        const date     = document.getElementById('reminderDate').value;
+        const priority = document.getElementById('reminderPriority').value;
+        if (!title) { alert('Please enter a title'); return; }
+        if (!date)  { alert('Please select a date');  return; }
+        const r = get();
+        r.push({ id: Date.now(), title, link, date, priority, completed: false, createdAt: new Date().toISOString() });
+        save(r);
+        document.getElementById('reminderTitle').value    = '';
+        document.getElementById('reminderLink').value     = '';
+        document.getElementById('reminderDate').value     = '';
+        document.getElementById('reminderPriority').value = 'medium';
+        renderAll(r);
+    }
+
+    function toggleReminder(id) {
+        const r = get(), item = r.find(x => x.id === id);
+        if (item) { item.completed = !item.completed; save(r); renderAll(r); }
+    }
+
+    function deleteReminder(id) {
+        if (!confirm('Delete this reminder?')) return;
+        const filtered = get().filter(x => x.id !== id);
+        save(filtered); renderAll(filtered);
+    }
+
+    function renderAll(reminders) {
+        const total   = reminders.length;
+        const done    = reminders.filter(r => r.completed).length;
+        document.getElementById('statTotal').textContent   = total;
+        document.getElementById('statDone').textContent    = done;
+        document.getElementById('statPending').textContent = total - done;
+        document.getElementById('statHigh').textContent    = reminders.filter(r => r.priority === 'high' && !r.completed).length;
+        document.getElementById('listCount').textContent   = `${total} item${total !== 1 ? 's' : ''}`;
+        document.getElementById('footStr').textContent     = `${done} / ${total} completed`;
+
+        const container = document.getElementById('remindersList');
+        if (!total) {
+            container.innerHTML = `<div class="empty-state"><span class="empty-icon">🔔</span><div class="empty-title">No reminders yet</div><div class="empty-sub">Add your first reminder above to get started</div></div>`;
+            return;
+        }
+        const sorted = [...reminders].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const slabIcon = {high:'🔴',medium:'🟡',low:'🟢'};
+        container.innerHTML = sorted.map(r => `
+            <div class="reminder-item p-${r.priority} ${r.completed ? 'completed' : ''}">
+                <div class="reminder-slab">${slabIcon[r.priority]||'🔵'}</div>
+                <div class="reminder-body">
+                    <div class="reminder-info">
+                        <div class="reminder-title">${r.title}</div>
+                        <div class="reminder-meta">
+                            ${r.link ? `<a href="${r.link}" target="_blank" class="reminder-link">🔗 ${r.link}</a>` : ''}
+                            <div class="meta-pill">📅 ${formatDate(r.date)}</div>
+                            <span class="pbadge pbadge-${r.priority}">${r.priority.toUpperCase()}</span>
+                            ${r.completed ? `<div class="meta-pill" style="color:var(--green);border-color:rgba(0,255,136,.3)">✓ DONE</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="reminder-footer">
+                    <button class="action-btn complete-btn" onclick="toggleReminder(${r.id})">${r.completed ? '↩ Undo' : '✓ Done'}</button>
+                    <button class="action-btn delete-btn" onclick="deleteReminder(${r.id})">✕ Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatDate(d) {
+        return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('reminderDate').valueAsDate = new Date();
+        renderAll(get());
+    });
+</script>
+
+<!-- Shared scripts -->
+<script src="../js/data.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/ui.js"></script>
+</body>
+</html>

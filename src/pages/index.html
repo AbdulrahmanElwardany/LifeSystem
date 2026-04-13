@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life System — Dashboard</title>
+
+<!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+
+<!-- Background -->
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+  <!-- Topbar -->
+  <div class="topbar anim d0">
+    <span class="topbar-brand">LEARNING OS / HOME</span>
+    <span class="topbar-status"><span class="status-dot"></span>SYSTEM ONLINE</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero anim d1">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Your Personal Dashboard</div>
+      <h1 class="hero-h1">LIFE<br><em>SYSTEM</em></h1>
+      <p class="hero-sub">
+        // Keep learning, keep growing 🚀<br>
+        // Track your progress across all courses<br>
+        // Build habits. Stay consistent. Win.
+      </p>
+    </div>
+
+    <!-- Study streak ring -->
+    <div class="ring-wrap" style="margin-top:36px;margin-right:40px">
+      <svg viewBox="0 0 280 280">
+        <defs>
+          <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#00ff88"/>
+            <stop offset="100%" stop-color="#00e5ff"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-tick"  cx="140" cy="140" r="128" stroke-dasharray="3 9"/>
+        <circle class="ring-track" cx="140" cy="140" r="118"/>
+        <circle class="ring-prog"  cx="140" cy="140" r="118" id="heroProgressArc"/>
+      </svg>
+      <div class="ring-inner">
+        <div class="ring-pct"   id="heroProgressPct">0</div>
+        <div class="ring-label" id="heroRingLabel">DAYS ACTIVE</div>
+        <div class="ring-sub"   id="heroProgressFraction">— / — days</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote banner -->
+  <div class="quote-banner anim d2" onclick="AppData.nextQuote()">
+    <div class="quote-icon">💬</div>
+    <div class="quote-text animating" id="quoteText"></div>
+    <div class="quote-hint">click to refresh</div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="sh anim d2">
+    <span class="sh-text">Quick Stats</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="stats-bar anim d3">
+    <div class="stat-card green">
+      <div class="stat-label">Overall Progress</div>
+      <div class="stat-value" id="statTotalPct">0%</div>
+      <div class="stat-sub"   id="statTotalSub">0 / 0 lessons</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="statTotalBar"></div></div>
+    </div>
+    <div class="stat-card cyan">
+      <div class="stat-label">Today Sessions</div>
+      <div class="stat-value" id="statSessions">0</div>
+      <div class="stat-sub"   id="statMinutes">0 min studied</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="statSessionBar"></div></div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Reminders</div>
+      <div class="stat-value" id="statReminders">0</div>
+      <div class="stat-sub"   id="statReminderSub">active items</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="statReminderBar"></div></div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Bug Reports</div>
+      <div class="stat-value" id="statWriteups">0</div>
+      <div class="stat-sub"   id="statWriteupSub">writeups logged</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="statWriteupBar"></div></div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="sh anim d4">
+    <span class="sh-text">Navigation</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="nav-grid">
+
+    <a href="overall-progress.html" class="nav-card nav-card-g anim d4">
+      <span class="nav-card-idx">Section — 01</span>
+      <div class="nav-card-icon">📊</div>
+      <div class="nav-card-title">Overall Progress</div>
+      <div class="nav-card-desc"><span id="totalLessonsPreview">130</span> lessons &nbsp;·&nbsp; courses tracking</div>
+      <div class="nav-arc-row">
+        <svg width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+          <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+          <circle id="progressArc" cx="26" cy="26" r="20" fill="none" stroke="#00ff88" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66"
+                  transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 1s ease .4s;filter:drop-shadow(0 0 6px rgba(0,255,136,.5))"/>
+        </svg>
+        <div class="nav-arc-info">
+          <div class="nav-arc-pct"><span id="progressArcPct">0</span>%</div>
+          <div class="nav-arc-detail"><span id="totalCompletedPreview">0</span> / <span id="totalLessonsPreview2">130</span> lessons</div>
+        </div>
+      </div>
+      <div class="nav-seg-bar" id="navSegProgress"></div>
+      <div class="nav-cta">CONTINUE LEARNING <span class="nav-cta-arrow">→</span></div>
+    </a>
+
+    <a href="day-planner.html" class="nav-card nav-card-c anim d5">
+      <span class="nav-card-idx">Section — 02</span>
+      <div class="nav-card-icon">📅</div>
+      <div class="nav-card-title">Daily Planner</div>
+      <div class="nav-card-desc">Plan your sessions &amp; track study time</div>
+      <div class="nav-arc-row">
+        <svg width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+          <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+          <circle id="plannerArc" cx="26" cy="26" r="20" fill="none" stroke="#00e5ff" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66"
+                  transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 1s ease .5s;filter:drop-shadow(0 0 6px rgba(0,229,255,.5))"/>
+        </svg>
+        <div class="nav-arc-info">
+          <div class="nav-arc-pct" style="color:var(--cyan)"><span id="weekTasksPreview">0</span> sessions</div>
+          <div class="nav-arc-detail"><span id="weekCompletionPreview">0</span> min studied today</div>
+        </div>
+      </div>
+      <div class="nav-seg-bar" id="navSegPlanner"></div>
+      <div class="nav-cta">OPEN PLANNER <span class="nav-cta-arrow">→</span></div>
+    </a>
+
+    <a href="checklist.html" class="nav-card nav-card-p anim d6">
+      <span class="nav-card-idx">Section — 03</span>
+      <div class="nav-card-icon">✅</div>
+      <div class="nav-card-title">Checklist</div>
+      <div class="nav-card-desc">Reminders, writeups &amp; tasks</div>
+      <div class="nav-arc-row">
+        <svg width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+          <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+          <circle id="checklistArc" cx="26" cy="26" r="20" fill="none" stroke="#9b5de5" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66"
+                  transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 1s ease .6s;filter:drop-shadow(0 0 6px rgba(155,93,229,.5))"/>
+        </svg>
+        <div class="nav-arc-info">
+          <div class="nav-arc-pct"><span id="totalRemindersPreview">0</span> reminders</div>
+          <div class="nav-arc-detail"><span id="totalWriteupsPreview">0</span> writeups logged</div>
+        </div>
+      </div>
+      <div class="nav-seg-bar" id="navSegChecklist"></div>
+      <div class="nav-cta">OPEN CHECKLIST <span class="nav-cta-arrow">→</span></div>
+    </a>
+
+    <a href="goals.html" class="nav-card nav-card-a anim d7">
+      <span class="nav-card-idx">Section — 04</span>
+      <div class="nav-card-icon">🎯</div>
+      <div class="nav-card-title">Goals Planner</div>
+      <div class="nav-card-desc">Daily, weekly &amp; monthly goal tracking</div>
+      <div class="nav-arc-row">
+        <svg width="52" height="52" viewBox="0 0 52 52" style="flex-shrink:0">
+          <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+          <circle id="goalsArc" cx="26" cy="26" r="20" fill="none" stroke="#ffbe0b" stroke-width="5"
+                  stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="125.66"
+                  transform="rotate(-90 26 26)" style="transition:stroke-dashoffset 1s ease .6s;filter:drop-shadow(0 0 6px rgba(255,190,11,.5))"/>
+        </svg>
+        <div class="nav-arc-info">
+          <div class="nav-arc-pct" style="color:var(--amber)"><span id="goalsTodayPreview">0</span> today</div>
+          <div class="nav-arc-detail"><span id="goalsDonePreview">0</span> completed</div>
+        </div>
+      </div>
+      <div class="nav-seg-bar" id="navSegGoals"></div>
+      <div class="nav-cta">OPEN GOALS <span class="nav-cta-arrow">→</span></div>
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="foot anim d7">
+    <span class="foot-l">// keep learning, keep growing 🚀</span>
+    <span class="foot-r" id="footStr">loading...</span>
+  </div>
+
+</div>
+
+<!-- Shared scripts -->
+<script src="../js/data.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/ui.js"></script>
+
+  <!-- Page script -->
+  <script src="../js/pages/dashboard.js"></script>
+</body>
+</html>

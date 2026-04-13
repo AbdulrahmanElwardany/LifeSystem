@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist - Full Roadmap</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="../css/pages/checklist.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="wrap">
+    <a href="index.html" class="back-btn anim d0">&nbsp;BACK TO HOME</a>
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / CHECKLIST</span>
+        <span class="topbar-status"><span class="status-dot"></span>SYSTEM ONLINE</span>
+    </div>
+    <div class="hero anim d1">
+        <div class="hero-eyebrow">Organize & Track</div>
+        <h1 class="hero-h1">CHECK<em>LIST</em></h1>
+        <p class="hero-sub">// Manage your reminders and document your findings</p>
+    </div>
+    <div class="sh anim d2">
+        <span class="sh-text">Sections</span>
+        <div class="sh-line"></div>
+    </div>
+    <div class="nav-grid">
+        <a href="reminder.html" class="nav-card nav-card-g anim d3">
+            <div class="nav-stripe"></div>
+            <div class="nav-card-icon">🔔</div>
+            <div class="nav-card-body">
+                <div class="nav-card-idx">Section — 01</div>
+                <div class="nav-card-title">Reminders</div>
+                <div class="nav-card-desc">Set reminders for important tasks, deadlines, and follow-ups.</div>
+                <div class="cprow">
+                    <span class="cp-label">PROGRESS</span>
+                    <span class="cp-val"><span id="completedReminders">0</span> / <span id="totalReminders">0</span> completed</span>
+                </div>
+                <div class="cp-bar"><div class="cp-fill" id="reminderProgressBar"></div></div>
+            </div>
+            <span class="nav-arrow">→</span>
+        </a>
+        <a href="idor-writeups.html" class="nav-card nav-card-c anim d4">
+            <div class="nav-stripe"></div>
+            <div class="nav-card-icon">📝</div>
+            <div class="nav-card-body">
+                <div class="nav-card-idx">Section — 02</div>
+                <div class="nav-card-title">IDOR Writeups & Reports</div>
+                <div class="nav-card-desc">Document your bug bounty findings, track submissions, and manage vulnerability reports.</div>
+                <div class="cprow">
+                    <span class="cp-label">PROGRESS</span>
+                    <span class="cp-val"><span id="completedWriteups">0</span> / <span id="totalWriteups">0</span> completed</span>
+                </div>
+                <div class="cp-bar"><div class="cp-fill" id="writeupProgressBar"></div></div>
+            </div>
+            <span class="nav-arrow">→</span>
+        </a>
+    </div>
+    <div class="foot anim d4">
+        <span class="foot-l">// Stay organized, keep tracking your progress</span>
+        <span class="foot-r" id="footStr">loading...</span>
+    </div>
+</div>
+
+  <!-- Shared scripts -->
+  <script src="../js/data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/ui.js"></script>
+
+  <!-- Page script -->
+  <script src="../js/pages/checklist.js"></script>
+</body>
+</html>

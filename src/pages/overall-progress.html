@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overall Progress</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="../css/pages/overall-progress.css">
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+    <!-- Back -->
+    <a href="index.html" class="back-btn"> &nbsp;BACK TO HOME</a>
+
+    <!-- Top bar -->
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / DASHBOARD</span>
+        <span class="topbar-status"><span class="status-dot"></span>TRACKING ACTIVE</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero anim d1">
+        <div class="hero-left">
+            <div class="hero-eyebrow">Your Learning Journey</div>
+            <h1 class="hero-h1">OVERALL<br><em>PROGRESS</em></h1>
+            <p class="hero-sub">// Real-time tracking across all<br>courses, modules, and milestones.<br>Keep pushing forward.</p>
+        </div>
+
+        <!-- Big ring -->
+        <div class="ring-wrap">
+            <svg viewBox="0 0 280 280">
+                <defs>
+                    <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%"   stop-color="#00ff88"/>
+                        <stop offset="100%" stop-color="#00e5ff"/>
+                    </linearGradient>
+                </defs>
+                <!-- Outer tick ring -->
+                <circle class="ring-tick" cx="140" cy="140" r="128" stroke-dasharray="3 9"/>
+                <!-- Track -->
+                <circle class="ring-track" cx="140" cy="140" r="118"/>
+                <!-- Progress -->
+                <circle class="ring-prog" id="ringProg" cx="140" cy="140" r="118"/>
+            </svg>
+            <div class="ring-inner">
+                <div class="ring-pct" id="ringPct">0%</div>
+                <div class="ring-label">Completed</div>
+                <div class="ring-sub" id="ringCount">— / —</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar anim d2">
+        <div class="stat-box">
+            <div class="stat-num" id="sDone">0</div>
+            <div class="stat-lbl">Lessons Done</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="sTotal">132</div>
+            <div class="stat-lbl">Total Lessons</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num">3</div>
+            <div class="stat-lbl">Courses</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="sRemain">—</div>
+            <div class="stat-lbl">Remaining</div>
+        </div>
+    </div>
+
+    <!-- Courses heading -->
+    <div class="courses-heading anim d3">
+        <span class="courses-heading-text">Active Courses</span>
+        <div class="courses-heading-line"></div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-grid">
+
+        <!-- Bug Bounty Hunter -->
+        <div class="card card-g anim d3">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 01</div>
+            <div class="card-icon">🎯</div>
+            <div class="card-title">Web Pentestion Level 1</div>
+            <div class="card-meta">93 lessons &nbsp;·&nbsp; 10 sections</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="bbArc" cx="26" cy="26" r="20" fill="none" stroke="#00ff88" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.5s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="bbPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="bbDone">0</span> / 93 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="bbSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="bbAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="bbNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('bb')">Set</button>
+            </div>
+            <a href="bug-bounty-roadmap.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- OWASP Top 10 -->
+        <div class="card card-c anim d4">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 02</div>
+            <div class="card-icon">🔒</div>
+            <div class="card-title">OWASP Top 10</div>
+            <div class="card-meta">20 vulnerabilities &nbsp;·&nbsp; 2 categories</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="owArc" cx="26" cy="26" r="20" fill="none" stroke="#00e5ff" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.6s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="owPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="owDone">0</span> / 20 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="owSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="owAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="owNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('ow')">Set</button>
+            </div>
+            <a href="learning-bugs.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- Graduation Project -->
+        <div class="card card-p anim d5">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 03</div>
+            <div class="card-icon">🎓</div>
+            <div class="card-title">Graduation Project</div>
+            <div class="card-meta">19 lessons &nbsp;·&nbsp; 3 sections</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="grArc" cx="26" cy="26" r="20" fill="none" stroke="#9b5de5" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.7s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="grPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="grDone">0</span> / 19 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="grSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="grAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="grNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('gr')">Set</button>
+            </div>
+            <a href="automation-roadmap.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="foot anim d5">
+        <span class="foot-l">// keep learning, keep growing 🚀</span>
+        <span class="foot-r" id="footStr">loading...</span>
+    </div>
+
+</div>
+
+<!-- ── Assign Popover ── -->
+<div class="popover-overlay" id="popoverOverlay" onclick="closePopoverOnBg(event)">
+    <div class="popover-box">
+        <button class="popover-close" onclick="closePopover()">×</button>
+        <div class="popover-course-tag" id="popoverTag">Course</div>
+        <div class="popover-title" id="popoverTitle">Assign Person</div>
+        <div class="popover-avatar-preview" id="popoverAvatarPreview">?</div>
+        <label class="popover-input-label">Instructor name</label>
+        <input class="popover-input" id="popoverInput" type="text" placeholder="e.g. Dr. Ahmed Karim" maxlength="30" spellcheck="false" autocomplete="off"/>
+        <div class="popover-actions">
+            <button class="popover-save" id="popoverSave" onclick="saveAssignee()">Save</button>
+            <button class="popover-clear" onclick="clearAssignee()">Clear</button>
+        </div>
+    </div>
+</div>
+
+  <!-- Shared scripts -->
+  <script src="../js/data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/ui.js"></script>
+
+  <!-- Page script -->
+  <script src="../js/pages/overall-progress.js"></script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals Planner</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="../css/pages/goals.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="wrap">
+
+  <div class="topbar anim d0">
+    <div class="topbar-left">
+      <div class="topbar-logo">🎯</div>
+      <div class="topbar-titles">
+        <span class="topbar-brand">Learning OS</span>
+        <span class="topbar-page">Goals Planner</span>
+      </div>
+    </div>
+    <a href="index.html" class="topbar-back">← Dashboard</a>
+  </div>
+
+  <div class="hero anim d1">
+    <div class="hero-eyebrow">Plan &amp; Achieve</div>
+    <h1 class="hero-h1">YOUR<br><em>GOALS</em></h1>
+    <p class="hero-sub">// أضف أهداف يومية أو أسبوعية أو شهرية مباشرةً<br>// الأهداف اليومية بتتجمع في الأسبوع والشهر تلقائياً<br>// Small wins compound into big results.</p>
+  </div>
+
+  <div class="tab-bar anim d2">
+    <button class="tab-btn active" data-tab="daily">📅 Daily</button>
+    <button class="tab-btn" data-tab="weekly">📆 Weekly</button>
+    <button class="tab-btn" data-tab="monthly">🗓 Monthly</button>
+  </div>
+
+  <!-- ═══════════════════ DAILY ═══════════════════ -->
+  <div class="tab-pane active" id="tab-daily">
+    <div class="day-strip-wrap anim d2">
+      <button class="day-arrow" onclick="changeDayPage(-1)" title="Previous week">‹</button>
+      <div class="day-strip" id="dayStrip"></div>
+      <button class="day-arrow" onclick="changeDayPage(1)" title="Next week">›</button>
+    </div>
+    <div class="stats-row anim d3">
+      <div class="stat-pill g"><div class="stat-pill-val" id="dS1">0</div><div class="stat-pill-lbl">Total</div></div>
+      <div class="stat-pill c"><div class="stat-pill-val" id="dS2">0</div><div class="stat-pill-lbl">Done</div></div>
+      <div class="stat-pill a"><div class="stat-pill-val" id="dS3">0%</div><div class="stat-pill-lbl">Rate</div></div>
+    </div>
+    <div class="progress-section anim d3">
+      <div class="progress-label-row"><span class="progress-label">Daily Progress</span><span class="progress-pct" id="dPct" style="color:var(--green)">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="dBar" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+    </div>
+    <div class="add-form anim d3" id="dForm">
+      <button class="add-form-toggle" onclick="toggleForm('dForm')">
+        <span>// + Add Daily Goal</span>
+        <span class="add-form-toggle-icon">+</span>
+      </button>
+      <div class="add-form-body">
+        <div class="form-row-full">
+          <div class="field"><label class="field-label">Goal Title</label><input class="field-input" id="dTitle" type="text" placeholder="e.g. Finish IDOR lab, study XSS writeup..."></div>
+          <div class="field"><label class="field-label">Priority</label>
+            <select class="field-select" id="dPri">
+              <option value="high">🔴 High</option><option value="medium" selected>🟡 Medium</option><option value="low">🔵 Low</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Category</label>
+            <select class="field-select" id="dCat">
+              <option value="study">📚 Study</option><option value="bugbounty">🐛 Bug Bounty</option>
+              <option value="lab">🧪 Lab</option><option value="writeup">📝 Writeup</option><option value="other">⚡ Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="field-label">Notes (optional)</label><input class="field-input" id="dNotes" type="text" placeholder="Any extra details..."></div>
+          <button class="btn-add" onclick="addDailyGoal()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+    <!-- Daily progress visual -->
+    <div class="sh"><span class="sh-text" id="dLabel">Today's Goals</span><div class="sh-line"></div></div>
+    <div class="goals-with-ring">
+      <div class="goals-list" id="dailyList"></div>
+      <div class="seg-ring-wrap" id="dProgressVisual"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ WEEKLY ═══════════════════ -->
+  <div class="tab-pane" id="tab-weekly">
+    <div class="nav-ctrl anim d2">
+      <button class="nav-ctrl-btn" onclick="changeWeek(-1)">← Prev</button>
+      <span class="nav-ctrl-label" id="weekLabel">This Week</span>
+      <button class="nav-ctrl-btn" onclick="changeWeek(1)">Next →</button>
+    </div>
+    <div class="stats-row anim d2">
+      <div class="stat-pill g"><div class="stat-pill-val" id="wS1">0</div><div class="stat-pill-lbl">Total</div></div>
+      <div class="stat-pill c"><div class="stat-pill-val" id="wS2">0</div><div class="stat-pill-lbl">Done</div></div>
+      <div class="stat-pill a"><div class="stat-pill-val" id="wS3">0%</div><div class="stat-pill-lbl">Rate</div></div>
+    </div>
+    <div class="progress-section anim d2">
+      <div class="progress-label-row"><span class="progress-label">Weekly Progress</span><span class="progress-pct" id="wPct" style="color:var(--cyan)">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="wBar" style="background:linear-gradient(90deg,var(--cyan),var(--purple))"></div></div>
+    </div>
+
+    <!-- Weekly-specific add form -->
+    <div class="add-form weekly-form anim d3" id="wForm">
+      <button class="add-form-toggle" onclick="toggleForm('wForm')">
+        <span>// + Add Weekly Goal</span>
+        <span class="add-form-toggle-icon">+</span>
+      </button>
+      <div class="add-form-body">
+        <div class="form-row-full">
+          <div class="field"><label class="field-label">Goal Title</label><input class="field-input" id="wTitle" type="text" placeholder="e.g. Complete recon methodology, finish 5 labs..."></div>
+          <div class="field"><label class="field-label">Priority</label>
+            <select class="field-select" id="wPri">
+              <option value="high">🔴 High</option><option value="medium" selected>🟡 Medium</option><option value="low">🔵 Low</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Category</label>
+            <select class="field-select" id="wCat">
+              <option value="study">📚 Study</option><option value="bugbounty">🐛 Bug Bounty</option>
+              <option value="lab">🧪 Lab</option><option value="writeup">📝 Writeup</option><option value="other">⚡ Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="field-label">Notes (optional)</label><input class="field-input" id="wNotes" type="text" placeholder="Any extra details..."></div>
+          <button class="btn-add cyan" onclick="addWeeklyGoal()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly progress ring + category bars -->
+    <div class="sh anim d3"><span class="sh-text" id="wGoalsHeading">This Week's Goals</span><div class="sh-line"></div></div>
+    <div class="goals-with-ring">
+      <div class="goals-list" id="weeklyOwnList"></div>
+      <div class="seg-ring-wrap" id="wProgressVisual"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ MONTHLY ═══════════════════ -->
+  <div class="tab-pane" id="tab-monthly">
+    <div class="nav-ctrl anim d2">
+      <button class="nav-ctrl-btn" onclick="changeMonth(-1)">← Prev</button>
+      <span class="nav-ctrl-label" id="monthLabel">April 2026</span>
+      <button class="nav-ctrl-btn" onclick="changeMonth(1)">Next →</button>
+    </div>
+    <div class="stats-row anim d2">
+      <div class="stat-pill g"><div class="stat-pill-val" id="mS1">0</div><div class="stat-pill-lbl">Total</div></div>
+      <div class="stat-pill c"><div class="stat-pill-val" id="mS2">0</div><div class="stat-pill-lbl">Done</div></div>
+      <div class="stat-pill a"><div class="stat-pill-val" id="mS3">0%</div><div class="stat-pill-lbl">Rate</div></div>
+    </div>
+    <div class="progress-section anim d2">
+      <div class="progress-label-row"><span class="progress-label">Monthly Progress</span><span class="progress-pct" id="mPct" style="color:var(--amber)">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="mBar" style="background:linear-gradient(90deg,var(--amber),#ff9500)"></div></div>
+    </div>
+
+    <!-- Monthly-specific add form -->
+    <div class="add-form monthly-form anim d3" id="mForm">
+      <button class="add-form-toggle" onclick="toggleForm('mForm')">
+        <span>// + Add Monthly Goal</span>
+        <span class="add-form-toggle-icon">+</span>
+      </button>
+      <div class="add-form-body">
+        <div class="form-row-full">
+          <div class="field"><label class="field-label">Goal Title</label><input class="field-input" id="mTitle" type="text" placeholder="e.g. Get first CVE, complete 30 labs, earn cert..."></div>
+          <div class="field"><label class="field-label">Priority</label>
+            <select class="field-select" id="mPri">
+              <option value="high">🔴 High</option><option value="medium" selected>🟡 Medium</option><option value="low">🔵 Low</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Category</label>
+            <select class="field-select" id="mCat">
+              <option value="study">📚 Study</option><option value="bugbounty">🐛 Bug Bounty</option>
+              <option value="lab">🧪 Lab</option><option value="writeup">📝 Writeup</option><option value="other">⚡ Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="field-label">Notes (optional)</label><input class="field-input" id="mNotes" type="text" placeholder="Any extra details..."></div>
+          <button class="btn-add amber" onclick="addMonthlyGoal()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly progress ring + category bars -->
+    <div class="sh anim d3"><span class="sh-text" id="mGoalsHeading">This Month's Goals</span><div class="sh-line"></div></div>
+    <div class="goals-with-ring">
+      <div class="goals-list" id="monthlyOwnList"></div>
+      <div class="seg-ring-wrap" id="mProgressVisual"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="foot-l">// set the goal · do the work · level up 🎯</span>
+    <span class="foot-r" id="footStr">—</span>
+  </div>
+</div>
+
+  <!-- Shared scripts -->
+  <script src="../js/data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/ui.js"></script>
+
+  <!-- Page script -->
+  <script src="../js/pages/goals.js"></script>
+</body>
+</html>

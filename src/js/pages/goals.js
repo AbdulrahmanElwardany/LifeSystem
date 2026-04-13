@@ -1,0 +1,305 @@
+/* goals.js — Page logic */
+
+const DAYS_SHORT  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYS_FULL   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAT_ICON    = {study:'📚',bugbounty:'🐛',lab:'🧪',writeup:'📝',other:'⚡'};
+const CAT_LABEL   = {study:'Study',bugbounty:'Bug Bounty',lab:'Lab',writeup:'Writeup',other:'Other'};
+const PRI_CLASS   = {high:'pri-high',medium:'pri-medium',low:'pri-low'};
+const PRI_LABEL   = {high:'HIGH',medium:'MED',low:'LOW'};
+const STORAGE_KEY = 'goals-v3';
+
+// ── Helpers ──────────────────────────────────────────────
+function fmtDate(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function parseDate(s){ return new Date(s+'T12:00:00'); }
+function weekMonday(d,off=0){ const c=new Date(d); c.setDate(d.getDate()-((d.getDay()+6)%7)+off*7); c.setHours(0,0,0,0); return c; }
+function weekDates(mon){ return Array.from({length:7},(_,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); return d; }); }
+function monthDates(base,off=0){ const d=new Date(base.getFullYear(),base.getMonth()+off,1); const days=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); return Array.from({length:days},(_,i)=>new Date(d.getFullYear(),d.getMonth(),i+1)); }
+function weekRangeLabel(mon){ const sun=new Date(mon); sun.setDate(mon.getDate()+6); const fmt=x=>`${x.getDate()} ${MONTHS_FULL[x.getMonth()].slice(0,3)}`; return `${fmt(mon)} — ${fmt(sun)} ${sun.getFullYear()}`; }
+function weekKey(mon){ return `w_${fmtDate(mon)}`; }
+function monthKey(d){ return `m_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function loadAll(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function saveAll(g){ localStorage.setItem(STORAGE_KEY,JSON.stringify(g)); }
+function goalsForDates(strs){ const s=new Set(strs); return loadAll().filter(g=>g.type==='daily'&&s.has(g.date)); }
+function escHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+let selDate='', weekOffset=0, monthOffset=0, dayPageOffset=0;
+selDate=fmtDate(TODAY);
+
+// ── Toggle add forms ─────────────────────────────────────
+function toggleForm(id){
+  const form=document.getElementById(id);
+  form.classList.toggle('open');
+  if(form.classList.contains('open')){
+    // focus first input when opened
+    const inp=form.querySelector('.field-input');
+    if(inp) setTimeout(()=>inp.focus(),50);
+  }
+}
+
+// ── Tabs ─────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='weekly') renderWeekly();
+    if(btn.dataset.tab==='monthly') renderMonthly();
+  });
+});
+
+// ── Add Goal Helpers ──────────────────────────────────────
+function shakeInput(el){ el.style.borderColor='rgba(255,77,109,.6)'; el.style.animation='shake .3s ease'; setTimeout(()=>{el.style.borderColor='';el.style.animation='';},500); }
+
+function addDailyGoal(){
+  const title=document.getElementById('dTitle').value.trim();
+  if(!title){ shakeInput(document.getElementById('dTitle')); return; }
+  const all=loadAll();
+  all.push({id:Date.now(),type:'daily',date:selDate,title,priority:document.getElementById('dPri').value,category:document.getElementById('dCat').value,notes:document.getElementById('dNotes').value.trim(),done:false,createdAt:new Date().toISOString()});
+  saveAll(all);
+  document.getElementById('dTitle').value='';
+  document.getElementById('dNotes').value='';
+  renderAll();
+}
+
+function addWeeklyGoal(){
+  const title=document.getElementById('wTitle').value.trim();
+  if(!title){ shakeInput(document.getElementById('wTitle')); return; }
+  const mon=weekMonday(TODAY,weekOffset);
+  const all=loadAll();
+  all.push({id:Date.now(),type:'weekly',weekKey:weekKey(mon),title,priority:document.getElementById('wPri').value,category:document.getElementById('wCat').value,notes:document.getElementById('wNotes').value.trim(),done:false,createdAt:new Date().toISOString()});
+  saveAll(all);
+  document.getElementById('wTitle').value='';
+  document.getElementById('wNotes').value='';
+  renderWeekly();
+  updateFooter();
+}
+
+function addMonthlyGoal(){
+  const title=document.getElementById('mTitle').value.trim();
+  if(!title){ shakeInput(document.getElementById('mTitle')); return; }
+  const refDate=new Date(TODAY.getFullYear(),TODAY.getMonth()+monthOffset,1);
+  const all=loadAll();
+  all.push({id:Date.now(),type:'monthly',monthKey:monthKey(refDate),title,priority:document.getElementById('mPri').value,category:document.getElementById('mCat').value,notes:document.getElementById('mNotes').value.trim(),done:false,createdAt:new Date().toISOString()});
+  saveAll(all);
+  document.getElementById('mTitle').value='';
+  document.getElementById('mNotes').value='';
+  renderMonthly();
+  updateFooter();
+}
+
+function toggleGoal(id){ const all=loadAll(); const g=all.find(x=>x.id===id); if(g){g.done=!g.done;saveAll(all);} renderAll(); }
+function deleteGoal(id,e){ e.stopPropagation(); saveAll(loadAll().filter(x=>x.id!==id)); renderAll(); }
+function renderAll(){ renderDaily(); renderWeekly(); renderMonthly(); }
+
+// ── Goal Item HTML ────────────────────────────────────────
+function goalItemHtml(g){
+  const extraClass = g.type==='weekly'?'weekly-goal':g.type==='monthly'?'monthly-goal':'';
+  const typeTag = g.type==='weekly'?`<span class="goal-tag type-tag-weekly">📆 WEEKLY</span>`:g.type==='monthly'?`<span class="goal-tag type-tag-monthly">🗓 MONTHLY</span>`:'';
+  return `<div class="goal-item ${extraClass} ${g.done?'done':''}" onclick="toggleGoal(${g.id})">
+    <div class="goal-check">${g.done?'✓':''}</div>
+    <div class="goal-body">
+      <div class="goal-title">${escHtml(g.title)}</div>
+      <div class="goal-meta">
+        ${typeTag}
+        <span class="goal-tag ${PRI_CLASS[g.priority]}">${PRI_LABEL[g.priority]}</span>
+        <span class="goal-tag cat-tag">${CAT_ICON[g.category]} ${CAT_LABEL[g.category]}</span>
+        ${g.notes?`<span class="goal-date-tag">${escHtml(g.notes)}</span>`:''}
+      </div>
+    </div>
+    <button class="goal-del" onclick="deleteGoal(${g.id},event)">✕</button>
+  </div>`;
+}
+
+function setStats(ids,goals,barId,pctId){
+  const total=goals.length,done=goals.filter(x=>x.done).length,pct=total>0?Math.round((done/total)*100):0;
+  document.getElementById(ids[0]).textContent=total;
+  document.getElementById(ids[1]).textContent=done;
+  document.getElementById(ids[2]).textContent=pct+'%';
+  document.getElementById(pctId).textContent=pct+'%';
+  setTimeout(()=>{document.getElementById(barId).style.width=pct+'%';},150);
+}
+
+// ── DAILY ─────────────────────────────────────────────────
+function changeDayPage(dir){ dayPageOffset+=dir; renderDaily(); }
+
+function buildDayStrip(){
+  const strip=document.getElementById('dayStrip'); strip.innerHTML='';
+  // Center of the current 7-day window
+  const centerDay=new Date(TODAY); centerDay.setDate(TODAY.getDate()+dayPageOffset*7);
+  // Show Mon–Sun of the week containing centerDay
+  const mon=weekMonday(centerDay,0);
+  const days=weekDates(mon);
+  // Update range label removed — arrows handle navigation
+  days.forEach(d=>{
+    const ds=fmtDate(d);
+    const goals=loadAll().filter(g=>g.type==='daily'&&g.date===ds);
+    const isToday=ds===fmtDate(TODAY);
+    const btn=document.createElement('div');
+    btn.className=`day-btn${ds===selDate?' active':''}${isToday&&ds!==selDate?' is-today':''}${goals.length?' has-goals':''}`;
+    btn.innerHTML=`<div class="day-btn-name">${DAYS_SHORT[d.getDay()]}</div><div class="day-btn-num">${d.getDate()}</div><div class="day-dot"></div>`;
+    btn.addEventListener('click',()=>{ selDate=ds; renderDaily(); });
+    strip.appendChild(btn);
+  });
+}
+
+function renderDaily(){
+  buildDayStrip();
+  const goals=loadAll().filter(g=>g.type==='daily'&&g.date===selDate);
+  const d=parseDate(selDate);
+  const isToday=selDate===fmtDate(TODAY);
+  document.getElementById('dLabel').textContent=isToday?`Today — ${d.getDate()} ${MONTHS_FULL[d.getMonth()]}`:`${DAYS_FULL[d.getDay()]}, ${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
+  const sorted=[...goals].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1)||a.done-b.done);
+  document.getElementById('dailyList').innerHTML=sorted.length?sorted.map(goalItemHtml).join(''):`<div class="empty-state"><span class="empty-icon">🎯</span><div class="empty-title">No goals for this day</div><div class="empty-sub">Add your first daily goal above</div></div>`;
+  setStats(['dS1','dS2','dS3'],goals,'dBar','dPct');
+  renderProgressVisual('dProgressVisual', goals, 'var(--green)');
+  updateFooter();
+}
+
+// ── Segments Ring ─────────────────────────────────────────
+const CAT_COLORS={study:'#00ff88',bugbounty:'#ff4d6d',lab:'#00e5ff',writeup:'#9b5de5',other:'#ffbe0b'};
+
+function renderProgressVisual(containerId, goals, accentColor){
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  const total=goals.length, done=goals.filter(x=>x.done).length;
+  const pct=total>0?Math.round((done/total)*100):0;
+
+  const isGreen=accentColor==='var(--green)';
+  const isCyan=accentColor==='var(--cyan)';
+  const pctColor=isGreen?'#00ff88':isCyan?'#00e5ff':'#ffbe0b';
+  const gradA=isGreen?'#00ff88':isCyan?'#00e5ff':'#ffbe0b';
+  const gradB=isGreen?'#00c9ff':isCyan?'#9b5de5':'#ff6b35';
+  const gId=containerId.replace(/[^a-z]/gi,'');
+
+  if(!total){
+    container.innerHTML=`
+      <svg class="seg-ring-svg" viewBox="0 0 220 220">
+        <circle cx="110" cy="110" r="80" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="22" stroke-dasharray="10 10"/>
+        <text x="110" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="rgba(255,255,255,.15)" letter-spacing="2">NO</text>
+        <text x="110" y="124" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="rgba(255,255,255,.15)" letter-spacing="2">GOALS</text>
+      </svg>
+      <div class="seg-ring-info">
+        <span class="seg-ring-pct" style="color:rgba(255,255,255,.15)">—</span>
+        <span class="seg-ring-sub">Add goals to track</span>
+      </div>`;
+    return;
+  }
+
+  const R=80, sw=20;
+  const allDone=done===total;
+  const cx=110, cy=110;
+
+  // Draw arc using SVG path — works correctly at ALL percentages including 100%
+  function describeArc(pct){
+    if(pct>=100){
+      // Full circle as two semicircles (a single 360° arc is invalid in SVG)
+      return `M ${cx} ${cy-R} A ${R} ${R} 0 1 1 ${cx-0.01} ${cy-R}`;
+    }
+    const angle=(pct/100)*360;
+    const rad=(angle-90)*Math.PI/180;
+    const x=cx+R*Math.cos(rad);
+    const y=cy+R*Math.sin(rad);
+    const large=angle>180?1:0;
+    return `M ${cx} ${cy-R} A ${R} ${R} 0 ${large} 1 ${x} ${y}`;
+  }
+
+  // Category legend
+  const catCounts={};
+  goals.forEach(g=>{
+    if(!catCounts[g.category]) catCounts[g.category]={total:0,done:0};
+    catCounts[g.category].total++;
+    if(g.done) catCounts[g.category].done++;
+  });
+  const catLegend=Object.entries(catCounts).map(([cat,c])=>`
+    <div class="seg-ring-cat-row">
+      <div class="seg-ring-cat-dot" style="background:${CAT_COLORS[cat]};box-shadow:0 0 6px ${CAT_COLORS[cat]}88"></div>
+      <span class="seg-ring-cat-name">${CAT_ICON[cat]} ${CAT_LABEL[cat]}</span>
+      <span class="seg-ring-cat-count">${c.done}/${c.total}</span>
+    </div>`).join('');
+
+  container.innerHTML=`
+    <svg class="seg-ring-svg" viewBox="0 0 220 220">
+      <defs>
+        <linearGradient id="gr${gId}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${gradA}"/>
+          <stop offset="100%" stop-color="${gradB}"/>
+        </linearGradient>
+      </defs>
+      <!-- Track -->
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="${sw}"/>
+      <!-- Arc fill -->
+      ${pct>0?`<path d="${describeArc(pct)}" fill="none" stroke="url(#gr${gId})" stroke-width="${sw}" stroke-linecap="${pct>=100?'butt':'round'}"/>`:``}
+      <!-- Center icon -->
+      <text x="${cx}" y="${cy-14}" text-anchor="middle" dominant-baseline="central" font-size="26">${allDone?'🎯':'⚡'}</text>
+      <!-- Center done/total -->
+      <text x="${cx}" y="${cy+16}" text-anchor="middle" dominant-baseline="central"
+        font-family="'JetBrains Mono',monospace" font-size="20" font-weight="900" fill="${pctColor}">${done}/${total}</text>
+    </svg>
+    <div class="seg-ring-info">
+      <span class="seg-ring-pct" style="color:${pctColor};font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:900;display:block;line-height:1;letter-spacing:-1px">${pct}%</span>
+      <span class="seg-ring-sub">${done} of ${total} done</span>
+    </div>
+    ${catLegend?`<div class="seg-ring-cats">${catLegend}</div>`:''}`;
+}
+
+// ── WEEKLY ────────────────────────────────────────────────
+function changeWeek(dir){ weekOffset+=dir; renderWeekly(); }
+function weekBadge(goals){ if(!goals.length)return`<span class="wg-badge empty">0 goals</span>`; const done=goals.filter(x=>x.done).length,cls=done===goals.length?'done-all':'in-prog'; return`<span class="wg-badge ${cls}">${done}/${goals.length}</span>`; }
+function toggleGroup(h){ h.closest('.week-group').classList.toggle('collapsed'); }
+
+function renderWeekly(){
+  const mon=weekMonday(TODAY,weekOffset);
+  const wk=weekKey(mon);
+  const allGoals=loadAll();
+  const ownWeekGoals=allGoals.filter(g=>g.type==='weekly'&&g.weekKey===wk);
+
+  document.getElementById('weekLabel').textContent=weekOffset===0?'This Week':weekRangeLabel(mon);
+  document.getElementById('wGoalsHeading').textContent=weekOffset===0?`This Week's Goals — ${weekRangeLabel(mon)}`:weekRangeLabel(mon);
+  setStats(['wS1','wS2','wS3'],ownWeekGoals,'wBar','wPct');
+  renderProgressVisual('wProgressVisual', ownWeekGoals, 'var(--cyan)');
+
+  const ownList=document.getElementById('weeklyOwnList');
+  const sortedOwn=[...ownWeekGoals].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1)||a.done-b.done);
+  ownList.innerHTML=sortedOwn.length?sortedOwn.map(goalItemHtml).join(''):`<div class="empty-state"><span class="empty-icon">📆</span><div class="empty-title">No weekly goals yet</div><div class="empty-sub">Add goals for this week using the form above</div></div>`;
+  updateFooter();
+}
+
+// ── MONTHLY ───────────────────────────────────────────────
+function changeMonth(dir){ monthOffset+=dir; renderMonthly(); }
+
+function renderMonthly(){
+  const refDate=new Date(TODAY.getFullYear(),TODAY.getMonth()+monthOffset,1);
+  const mk=monthKey(refDate);
+  document.getElementById('monthLabel').textContent=`${MONTHS_FULL[refDate.getMonth()]} ${refDate.getFullYear()}`;
+  document.getElementById('mGoalsHeading').textContent=`${MONTHS_FULL[refDate.getMonth()]} ${refDate.getFullYear()} Goals`;
+
+  const allGoals=loadAll();
+  const ownMonthGoals=allGoals.filter(g=>g.type==='monthly'&&g.monthKey===mk);
+
+  setStats(['mS1','mS2','mS3'],ownMonthGoals,'mBar','mPct');
+  renderProgressVisual('mProgressVisual', ownMonthGoals, 'var(--amber)');
+
+  const ownList=document.getElementById('monthlyOwnList');
+  const sortedOwn=[...ownMonthGoals].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1)||a.done-b.done);
+  ownList.innerHTML=sortedOwn.length?sortedOwn.map(goalItemHtml).join(''):`<div class="empty-state"><span class="empty-icon">🗓</span><div class="empty-title">No monthly goals yet</div><div class="empty-sub">Add big-picture goals for this month using the form above</div></div>`;
+  updateFooter();
+}
+
+function updateFooter(){
+  const all=loadAll();
+  const done=all.filter(x=>x.done).length;
+  const d=all.filter(x=>x.type==='daily').length;
+  const w=all.filter(x=>x.type==='weekly').length;
+  const m=all.filter(x=>x.type==='monthly').length;
+  document.getElementById('footStr').textContent=`${done}/${all.length} done  ·  ${d} daily  ${w} weekly  ${m} monthly`;
+}
+
+// Enter key shortcuts
+['dTitle','dNotes'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addDailyGoal();}));
+['wTitle','wNotes'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addWeeklyGoal();}));
+['mTitle','mNotes'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addMonthlyGoal();}));
+
+document.addEventListener('DOMContentLoaded',()=>{ renderDaily(); });

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IDOR Writeups & Reports - Full Roadmap</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+
+  <!-- Page styles -->
+  <link rel="stylesheet" href="../css/pages/idor-writeups.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+
+<div class="wrap">
+    <a href="checklist.html" class="back-btn anim d0">&nbsp;BACK TO CHECKLIST</a>
+
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / IDOR WRITEUPS</span>
+        <span class="topbar-status"><span class="status-dot"></span>ACTIVE</span>
+    </div>
+
+    <div class="hero anim d1">
+        <div class="hero-eyebrow">Bug Bounty</div>
+        <h1 class="hero-h1">IDOR <em>WRITEUPS</em></h1>
+        <p class="hero-sub">// Document your bug bounty findings and track submissions</p>
+    </div>
+
+    <div class="stats-bar anim d2">
+        <div class="stat-pill sp-total"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-pill sp-done"><div class="stat-val" id="statDone">0</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-pill sp-pending"><div class="stat-val" id="statPending">0</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-pill sp-high"><div class="stat-val" id="statHigh">0</div><div class="stat-lbl">High Priority</div></div>
+    </div>
+
+    <div class="form-card anim d2">
+        <div class="form-card-title">Add New Writeup</div>
+        <div class="form-grid">
+            <div class="form-full field-wrap">
+                <label class="field-label">Title</label>
+                <input class="field-input" type="text" id="writeupTitle" placeholder="e.g., IDOR in User Profile API">
+            </div>
+            <div class="form-full field-wrap">
+                <label class="field-label">Link (Optional)</label>
+                <input class="field-input" type="url" id="writeupLink" placeholder="https://example.com">
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Priority</label>
+                <select class="field-input" id="writeupPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Date</label>
+                <input class="field-input" type="date" id="writeupDate">
+            </div>
+        </div>
+        <button class="add-btn" onclick="addWriteup()">＋ Add Writeup</button>
+    </div>
+
+    <div class="sh anim d3">
+        <div class="sh-left">
+            <div class="sh-icon">📝</div>
+            <div class="sh-labels">
+                <span class="sh-text">Writeups</span>
+                <span class="sh-sub">Sorted by date</span>
+            </div>
+        </div>
+        <div class="sh-right">
+            <span class="sh-dot"></span>
+            <span class="sh-count" id="listCount">0 items</span>
+        </div>
+    </div>
+    <div class="writeups-list anim d3" id="writeupsList"></div>
+
+    <div class="foot">
+        <span class="foot-l">// LEARNING OS — IDOR Writeups & Reports</span>
+        <span class="foot-r" id="footStr">0 / 0 completed</span>
+    </div>
+</div>
+
+  <!-- Shared scripts -->
+  <script src="../js/data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/ui.js"></script>
+
+  <!-- Page script -->
+  <script src="../js/pages/idor-writeups.js"></script>
+</body>
+</html>

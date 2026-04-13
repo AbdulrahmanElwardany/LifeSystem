@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overall Progress</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #05050f;
+            --bg2:       #0a0a1a;
+            --bg3:       #0f0f22;
+            --green:     #00ff88;
+            --green-dim: #00c96a;
+            --cyan:      #00e5ff;
+            --purple:    #9b5de5;
+            --amber:     #ffbe0b;
+            --border:    rgba(255,255,255,0.06);
+            --border2:   rgba(0,255,136,0.15);
+            --text:      #e0e0f0;
+            --muted:     #4a4a6a;
+            --mono:      'JetBrains Mono', monospace;
+            --display:   'Outfit', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--display);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Animated grid background ── */
+        .grid-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(0,255,136,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,136,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+        }
+
+        /* ── Glow orbs ── */
+        .orb {
+            position: fixed; border-radius: 50%;
+            filter: blur(100px); pointer-events: none; z-index: 0;
+        }
+        .orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(0,255,136,0.08), transparent 70%); top: -200px; left: -200px; }
+        .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(0,229,255,0.07), transparent 70%); bottom: -100px; right: -100px; }
+        .orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(155,93,229,0.07), transparent 70%); top: 50%; left: 60%; }
+
+        /* ── Scanline effect ── */
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 999; pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+        }
+
+        /* ── Layout ── */
+        .wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 32px 100px; }
+
+        /* ── Back ── */
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin: 32px 0 0;
+            font-family: var(--mono); font-size: 0.72rem; letter-spacing: 2px;
+            color: var(--muted); text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: var(--green); }
+        .back-btn::before { content: '←'; }
+
+        /* ── Top bar ── */
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            margin-bottom: 64px;
+        }
+        .topbar-brand {
+            font-family: var(--mono); font-size: 0.7rem;
+            letter-spacing: 3px; color: var(--muted); text-transform: uppercase;
+        }
+        .topbar-status {
+            display: flex; align-items: center; gap: 8px;
+            font-family: var(--mono); font-size: 0.68rem; color: var(--green);
+        }
+        .status-dot {
+            width: 7px; height: 7px; background: var(--green); border-radius: 50%;
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* ── Hero section ── */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--mono); font-size: 0.72rem;
+            color: var(--green); letter-spacing: 3px;
+            text-transform: uppercase; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .hero-eyebrow::before {
+            content: ''; width: 32px; height: 1px;
+            background: linear-gradient(90deg, var(--green), transparent);
+        }
+
+        .hero-h1 {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 900; line-height: 0.95;
+            letter-spacing: -3px; color: #fff;
+            margin-bottom: 24px;
+        }
+        .hero-h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-family: var(--mono); font-size: 0.78rem;
+            color: var(--muted); line-height: 1.8; max-width: 380px;
+        }
+
+        /* ── Big ring dial ── */
+        .ring-wrap {
+            position: relative; width: 280px; height: 280px;
+        }
+        .ring-wrap svg {
+            width: 280px; height: 280px;
+            transform: rotate(-90deg);
+        }
+        .ring-track { fill: none; stroke: rgba(255,255,255,0.04); stroke-width: 12; }
+        .ring-prog  {
+            fill: none;
+            stroke: url(#rg);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 801.1;
+            stroke-dashoffset: 801.1;
+            transition: stroke-dashoffset 1.6s cubic-bezier(0.16,1,0.3,1);
+        }
+        /* Decorative tick rings */
+        .ring-tick {
+            fill: none; stroke: rgba(0,255,136,0.12);
+            stroke-width: 1; stroke-dasharray: 4 8;
+        }
+
+        .ring-inner {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+        }
+        .ring-pct {
+            font-family: var(--mono); font-weight: 800;
+            font-size: 3.2rem; line-height: 1;
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ring-label {
+            font-family: var(--mono); font-size: 0.62rem;
+            letter-spacing: 3px; color: var(--muted);
+            text-transform: uppercase; margin-top: 6px;
+        }
+        .ring-sub {
+            font-family: var(--mono); font-size: 0.7rem;
+            color: var(--green); margin-top: 4px;
+        }
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 72px;
+            background: var(--bg2);
+        }
+        .stat-box {
+            padding: 26px 20px;
+            border-right: 1px solid var(--border);
+            position: relative; overflow: hidden;
+        }
+        .stat-box:last-child { border-right: none; }
+        .stat-box::before {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+        }
+        .stat-box:nth-child(1)::before { background: linear-gradient(90deg, var(--green), transparent); }
+        .stat-box:nth-child(2)::before { background: linear-gradient(90deg, var(--cyan),  transparent); }
+        .stat-box:nth-child(3)::before { background: linear-gradient(90deg, var(--purple), transparent); }
+        .stat-box:nth-child(4)::before { background: linear-gradient(90deg, var(--amber),  transparent); }
+
+        .stat-num {
+            font-family: var(--mono); font-size: 1.9rem;
+            font-weight: 800; line-height: 1; margin-bottom: 8px;
+        }
+        .stat-box:nth-child(1) .stat-num { color: var(--green); }
+        .stat-box:nth-child(2) .stat-num { color: var(--cyan); }
+        .stat-box:nth-child(3) .stat-num { color: var(--purple); }
+        .stat-box:nth-child(4) .stat-num { color: var(--amber); }
+
+        .stat-lbl { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+        /* ── Courses heading ── */
+        .courses-heading {
+            display: flex; align-items: center; gap: 18px; margin-bottom: 28px;
+        }
+        .courses-heading-text {
+            font-family: var(--mono); font-size: 0.68rem;
+            letter-spacing: 3px; text-transform: uppercase; color: var(--muted);
+        }
+        .courses-heading-line { flex: 1; height: 1px; background: var(--border); }
+
+        /* ── Course cards grid ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 80px;
+        }
+
+        .card {
+            background: var(--bg2);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 30px 26px 26px;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+            cursor: default;
+        }
+        .card:hover { transform: translateY(-6px); }
+        .card-g:hover  { border-color: rgba(0,255,136,0.3);  box-shadow: 0 24px 64px rgba(0,255,136,0.08); }
+        .card-c:hover  { border-color: rgba(0,229,255,0.3);  box-shadow: 0 24px 64px rgba(0,229,255,0.08); }
+        .card-p:hover  { border-color: rgba(155,93,229,0.35); box-shadow: 0 24px 64px rgba(155,93,229,0.1); }
+
+        /* Top stripe */
+        .card-stripe {
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        }
+        .card-g .card-stripe { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+        .card-c .card-stripe { background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+        .card-p .card-stripe { background: linear-gradient(90deg, var(--purple), #ec4899); }
+
+        /* Bg glow */
+        .card::after {
+            content: '';
+            position: absolute; top: -40px; right: -40px;
+            width: 160px; height: 160px; border-radius: 50%;
+            filter: blur(50px); pointer-events: none; opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card-g::after { background: rgba(0,255,136,0.12); }
+        .card-c::after { background: rgba(0,229,255,0.1); }
+        .card-p::after { background: rgba(155,93,229,0.12); }
+        .card:hover::after { opacity: 1; }
+
+        /* Card index */
+        .card-idx {
+            font-family: var(--mono); font-size: 0.62rem;
+            letter-spacing: 3px; text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .card-g .card-idx { color: var(--green); }
+        .card-c .card-idx { color: var(--cyan); }
+        .card-p .card-idx { color: var(--purple); }
+
+        .card-icon { font-size: 2rem; margin-bottom: 10px; line-height: 1; }
+
+        .card-title {
+            font-size: 1.25rem; font-weight: 800;
+            color: #fff; margin-bottom: 8px; line-height: 1.2;
+        }
+
+        .card-meta {
+            font-family: var(--mono); font-size: 0.68rem;
+            color: var(--muted); margin-bottom: 22px;
+        }
+
+        /* Mini progress arc */
+        .mini-arc-wrap {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+        }
+        .mini-arc { flex-shrink: 0; }
+        .mini-arc-text { flex: 1; }
+        .mini-arc-pct {
+            font-family: var(--mono); font-weight: 700; font-size: 1.1rem;
+        }
+        .card-g .mini-arc-pct { color: var(--green); }
+        .card-c .mini-arc-pct { color: var(--cyan); }
+        .card-p .mini-arc-pct { color: var(--purple); }
+        .mini-arc-detail {
+            font-family: var(--mono); font-size: 0.62rem; color: var(--muted);
+        }
+
+        /* Segmented progress bar */
+        .seg-bar { display: flex; gap: 3px; margin-bottom: 22px; height: 5px; }
+        .seg {
+            flex: 1; border-radius: 99px; height: 100%;
+            background: rgba(255,255,255,0.06);
+            transition: background 0.4s;
+        }
+        .seg.filled-g { background: var(--green); }
+        .seg.filled-c { background: var(--cyan); }
+        .seg.filled-p { background: var(--purple); }
+
+        /* CTA */
+        .card-cta {
+            margin-top: auto;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 10px; border: 1px solid;
+            text-decoration: none;
+            font-family: var(--mono); font-size: 0.72rem; letter-spacing: 1px;
+            font-weight: 600; transition: all 0.2s;
+        }
+        .card-g .card-cta { color: var(--green);  border-color: rgba(0,255,136,0.2);  background: rgba(0,255,136,0.04); }
+        .card-c .card-cta { color: var(--cyan);   border-color: rgba(0,229,255,0.2);  background: rgba(0,229,255,0.04); }
+        .card-p .card-cta { color: var(--purple); border-color: rgba(155,93,229,0.2); background: rgba(155,93,229,0.04); }
+        .card-g .card-cta:hover { background: rgba(0,255,136,0.12);  border-color: var(--green); }
+        .card-c .card-cta:hover { background: rgba(0,229,255,0.12);  border-color: var(--cyan); }
+        .card-p .card-cta:hover { background: rgba(155,93,229,0.14); border-color: var(--purple); }
+        .cta-arrow { transition: transform 0.2s; }
+        .card-cta:hover .cta-arrow { transform: translateX(5px); }
+
+        /* ── Assignee section ── */
+        .assignee-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 14px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .assignee-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono); font-size: 0.72rem; font-weight: 800;
+            flex-shrink: 0; border: 2px solid; letter-spacing: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .card-g .assignee-avatar { background: rgba(0,255,136,0.12); color: var(--green);  border-color: rgba(0,255,136,0.35); }
+        .card-c .assignee-avatar { background: rgba(0,229,255,0.12); color: var(--cyan);   border-color: rgba(0,229,255,0.35); }
+        .card-p .assignee-avatar { background: rgba(155,93,229,0.15);color: var(--purple); border-color: rgba(155,93,229,0.4); }
+
+        .assignee-info { flex: 1; min-width: 0; }
+        .assignee-label {
+            font-family: var(--mono); font-size: 0.56rem;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 3px;
+        }
+        .assignee-name-display {
+            font-family: var(--mono); font-size: 0.8rem; font-weight: 600;
+            color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .assignee-name-display.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+
+        /* Assign button */
+        .assign-btn {
+            flex-shrink: 0;
+            font-family: var(--mono); font-size: 0.62rem; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            padding: 6px 11px; border-radius: 7px; border: 1px solid;
+            background: transparent; cursor: pointer;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .card-g .assign-btn { color: var(--green);  border-color: rgba(0,255,136,0.25); }
+        .card-c .assign-btn { color: var(--cyan);   border-color: rgba(0,229,255,0.25); }
+        .card-p .assign-btn { color: var(--purple); border-color: rgba(155,93,229,0.3); }
+        .card-g .assign-btn:hover { background: rgba(0,255,136,0.1);  border-color: var(--green); }
+        .card-c .assign-btn:hover { background: rgba(0,229,255,0.1);  border-color: var(--cyan); }
+        .card-p .assign-btn:hover { background: rgba(155,93,229,0.14);border-color: var(--purple); }
+
+        /* ── Popover ── */
+        .popover-overlay {
+            display: none; position: fixed; inset: 0; z-index: 500;
+            background: rgba(5,5,15,0.7); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        .popover-overlay.open { display: flex; }
+
+        .popover-box {
+            background: #0e0e22; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px; padding: 32px 28px;
+            width: 100%; max-width: 360px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            position: relative;
+            animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .popover-close {
+            position: absolute; top: 16px; right: 18px;
+            background: none; border: none; color: var(--muted);
+            font-size: 1.2rem; cursor: pointer; line-height: 1;
+            transition: color 0.2s;
+        }
+        .popover-close:hover { color: #fff; }
+
+        .popover-course-tag {
+            font-family: var(--mono); font-size: 0.62rem;
+            letter-spacing: 3px; text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .popover-title {
+            font-size: 1.15rem; font-weight: 800; color: #fff;
+            margin-bottom: 24px;
+        }
+
+        /* Big avatar preview in popover */
+        .popover-avatar-preview {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono); font-size: 1.3rem; font-weight: 800;
+            margin: 0 auto 20px; border: 2px solid;
+            transition: all 0.2s;
+        }
+
+        .popover-input-label {
+            font-family: var(--mono); font-size: 0.62rem;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 8px; display: block;
+        }
+        .popover-input {
+            width: 100%; padding: 12px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: #fff;
+            font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+            outline: none; transition: border-color 0.2s;
+            margin-bottom: 16px;
+        }
+        .popover-input:focus { border-color: rgba(255,255,255,0.3); }
+        .popover-input::placeholder { color: var(--muted); font-weight: 400; }
+
+        .popover-actions { display: flex; gap: 10px; }
+        .popover-save {
+            flex: 1; padding: 11px;
+            border-radius: 9px; border: none;
+            font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 1px; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .popover-save:hover { opacity: 0.85; }
+        .popover-clear {
+            padding: 11px 16px;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--muted); font-family: var(--mono);
+            font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
+        }
+        .popover-clear:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
+
+        /* ── Footer ── */
+        .foot {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .foot-l { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+        .foot-r { font-family: var(--mono); font-size: 0.68rem; color: var(--green); }
+
+        /* ── Entrance animations ── */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .anim { opacity: 0; animation: slideUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .d0 { animation-delay: 0.05s; }
+        .d1 { animation-delay: 0.15s; }
+        .d2 { animation-delay: 0.25s; }
+        .d3 { animation-delay: 0.35s; }
+        .d4 { animation-delay: 0.45s; }
+        .d5 { animation-delay: 0.55s; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+            .ring-wrap { margin: 0 auto; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: repeat(2,1fr); }
+            .stat-box:nth-child(2) { border-right: none; }
+        }
+        @media (max-width: 600px) {
+            .hero-h1 { font-size: 2.8rem; letter-spacing: -2px; }
+            .stats-bar { grid-template-columns: 1fr 1fr; }
+            .wrap { padding: 0 18px 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+    <!-- Back -->
+    <a href="index.html" class="back-btn"> &nbsp;BACK TO HOME</a>
+
+    <!-- Top bar -->
+    <div class="topbar anim d0">
+        <span class="topbar-brand">LEARNING OS / DASHBOARD</span>
+        <span class="topbar-status"><span class="status-dot"></span>TRACKING ACTIVE</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero anim d1">
+        <div class="hero-left">
+            <div class="hero-eyebrow">Your Learning Journey</div>
+            <h1 class="hero-h1">OVERALL<br><em>PROGRESS</em></h1>
+            <p class="hero-sub">// Real-time tracking across all<br>courses, modules, and milestones.<br>Keep pushing forward.</p>
+        </div>
+
+        <!-- Big ring -->
+        <div class="ring-wrap">
+            <svg viewBox="0 0 280 280">
+                <defs>
+                    <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%"   stop-color="#00ff88"/>
+                        <stop offset="100%" stop-color="#00e5ff"/>
+                    </linearGradient>
+                </defs>
+                <!-- Outer tick ring -->
+                <circle class="ring-tick" cx="140" cy="140" r="128" stroke-dasharray="3 9"/>
+                <!-- Track -->
+                <circle class="ring-track" cx="140" cy="140" r="118"/>
+                <!-- Progress -->
+                <circle class="ring-prog" id="ringProg" cx="140" cy="140" r="118"/>
+            </svg>
+            <div class="ring-inner">
+                <div class="ring-pct" id="ringPct">0%</div>
+                <div class="ring-label">Completed</div>
+                <div class="ring-sub" id="ringCount">— / —</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar anim d2">
+        <div class="stat-box">
+            <div class="stat-num" id="sDone">0</div>
+            <div class="stat-lbl">Lessons Done</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="sTotal">132</div>
+            <div class="stat-lbl">Total Lessons</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num">3</div>
+            <div class="stat-lbl">Courses</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-num" id="sRemain">—</div>
+            <div class="stat-lbl">Remaining</div>
+        </div>
+    </div>
+
+    <!-- Courses heading -->
+    <div class="courses-heading anim d3">
+        <span class="courses-heading-text">Active Courses</span>
+        <div class="courses-heading-line"></div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-grid">
+
+        <!-- Bug Bounty Hunter -->
+        <div class="card card-g anim d3">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 01</div>
+            <div class="card-icon">🎯</div>
+            <div class="card-title">Web Pentestion Level 1</div>
+            <div class="card-meta">93 lessons &nbsp;·&nbsp; 10 sections</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="bbArc" cx="26" cy="26" r="20" fill="none" stroke="#00ff88" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.5s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="bbPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="bbDone">0</span> / 93 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="bbSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="bbAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="bbNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('bb')">Set</button>
+            </div>
+            <a href="bug-bounty-roadmap.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- OWASP Top 10 -->
+        <div class="card card-c anim d4">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 02</div>
+            <div class="card-icon">🔒</div>
+            <div class="card-title">OWASP Top 10</div>
+            <div class="card-meta">20 vulnerabilities &nbsp;·&nbsp; 2 categories</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="owArc" cx="26" cy="26" r="20" fill="none" stroke="#00e5ff" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.6s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="owPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="owDone">0</span> / 20 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="owSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="owAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="owNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('ow')">Set</button>
+            </div>
+            <a href="learning-bugs.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- Graduation Project -->
+        <div class="card card-p anim d5">
+            <div class="card-stripe"></div>
+            <div class="card-idx">Course — 03</div>
+            <div class="card-icon">🎓</div>
+            <div class="card-title">Graduation Project</div>
+            <div class="card-meta">19 lessons &nbsp;·&nbsp; 3 sections</div>
+            <div class="mini-arc-wrap">
+                <svg class="mini-arc" width="52" height="52" viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/>
+                    <circle id="grArc" cx="26" cy="26" r="20" fill="none" stroke="#9b5de5" stroke-width="5" stroke-linecap="round"
+                        stroke-dasharray="125.66" stroke-dashoffset="125.66" transform="rotate(-90 26 26)"
+                        style="transition: stroke-dashoffset 1s ease 0.7s"/>
+                </svg>
+                <div class="mini-arc-text">
+                    <div class="mini-arc-pct"><span id="grPct">0</span>%</div>
+                    <div class="mini-arc-detail"><span id="grDone">0</span> / 19 lessons</div>
+                </div>
+            </div>
+            <div class="seg-bar" id="grSegs"></div>
+            <div class="assignee-row">
+                <div class="assignee-avatar" id="grAvatar">?</div>
+                <div class="assignee-info">
+                    <div class="assignee-label">Instructor</div>
+                    <div class="assignee-name-display empty" id="grNameDisplay">Not set</div>
+                </div>
+                <button class="assign-btn" onclick="openPopover('gr')">Set</button>
+            </div>
+            <a href="automation-roadmap.html" class="card-cta">
+                <span>CONTINUE LEARNING</span>
+                <span class="cta-arrow">→</span>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="foot anim d5">
+        <span class="foot-l">// keep learning, keep growing 🚀</span>
+        <span class="foot-r" id="footStr">loading...</span>
+    </div>
+
+</div>
+
+<!-- ── Assign Popover ── -->
+<div class="popover-overlay" id="popoverOverlay" onclick="closePopoverOnBg(event)">
+    <div class="popover-box">
+        <button class="popover-close" onclick="closePopover()">×</button>
+        <div class="popover-course-tag" id="popoverTag">Course</div>
+        <div class="popover-title" id="popoverTitle">Assign Person</div>
+        <div class="popover-avatar-preview" id="popoverAvatarPreview">?</div>
+        <label class="popover-input-label">Instructor name</label>
+        <input class="popover-input" id="popoverInput" type="text" placeholder="e.g. Dr. Ahmed Karim" maxlength="30" spellcheck="false" autocomplete="off"/>
+        <div class="popover-actions">
+            <button class="popover-save" id="popoverSave" onclick="saveAssignee()">Save</button>
+            <button class="popover-clear" onclick="clearAssignee()">Clear</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ── Graduation lesson defaults ───────────────────────── */
+    const GRAD_LESSONS = {
+        'intro-course-structure':'done','basics-setup':'done','basics-syntax1':'done',
+        'basics-syntax2':'done','basics-files':'done','basics-http':'done',
+        'basics-concurrency':'done','basics-logging':'done','basics-flags':'done',
+        'basics-project':'done','basics-packages':'done','basics-regex':'start',
+        'assets-concepts':'done','assets-whois':'done','assets-domain':'start',
+        'assets-dns':'start','assets-subdomain':'start'
+    };
+
+    /* ── Helpers ───────────────────────────────────────────── */
+    function animNum(el, to, decimals) {
+        const start = Date.now(), dur = 1200, from = 0;
+        const run = () => {
+            const p = Math.min((Date.now()-start)/dur, 1);
+            const ease = 1 - Math.pow(1-p, 3);
+            el.textContent = (from + (to-from)*ease).toFixed(decimals||0);
+            if (p < 1) requestAnimationFrame(run);
+        };
+        requestAnimationFrame(run);
+    }
+
+    function setMiniArc(arcEl, pct) {
+        const c = 125.66;
+        arcEl.style.strokeDashoffset = c - (pct/100)*c;
+    }
+
+    function buildSegs(container, total, done, cls) {
+        container.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+            const s = document.createElement('div');
+            s.className = 'seg' + (i < done ? ' ' + cls : '');
+            container.appendChild(s);
+        }
+    }
+
+    /* ── Big ring ──────────────────────────────────────────── */
+    function setRing(pct, done, total) {
+        const circ = 2 * Math.PI * 118; // 741.12
+        document.getElementById('ringProg').style.strokeDasharray  = circ;
+        document.getElementById('ringProg').style.strokeDashoffset = circ - (pct/100)*circ;
+        animNum(document.getElementById('ringPct'), pct, 0);
+        // workaround: update text after animation starts
+        setTimeout(() => {
+            document.getElementById('ringPct').textContent = Math.round(pct) + '%';
+        }, 1250);
+        document.getElementById('ringCount').textContent = `${done} / ${total}`;
+    }
+
+    /* ── Main ──────────────────────────────────────────────── */
+    function loadProgress() {
+        // Bug Bounty
+        const bbSaved = localStorage.getItem('bugBountyProgress');
+        const bbDone  = bbSaved ? JSON.parse(bbSaved).length : 0;
+        const bbTotal = 93;
+        const bbPct   = Math.round((bbDone/bbTotal)*100);
+
+        // OWASP
+        const owSaved = localStorage.getItem('learningBugsProgress');
+        const owDone  = owSaved ? JSON.parse(owSaved).length : 0;
+        const owTotal = 20;
+        const owPct   = Math.round((owDone/owTotal)*100);
+
+        // Graduation
+        const grSaved = localStorage.getItem('graduationProgress');
+        const grState = grSaved ? JSON.parse(grSaved) : GRAD_LESSONS;
+        const grDone  = Object.values(grState).filter(v=>v==='done').length;
+        const grTotal = Object.keys(GRAD_LESSONS).length;
+        const grPct   = Math.round((grDone/grTotal)*100);
+
+        // Totals
+        const totalDone  = bbDone + owDone + grDone;
+        const totalItems = bbTotal + owTotal + grTotal;
+        const totalPct   = Math.round((totalDone/totalItems)*100);
+
+        /* ── Update Bug Bounty card ── */
+        document.getElementById('bbPct').textContent  = bbPct;
+        document.getElementById('bbDone').textContent = bbDone;
+        setTimeout(() => setMiniArc(document.getElementById('bbArc'), bbPct), 300);
+        buildSegs(document.getElementById('bbSegs'), Math.min(bbTotal,20), Math.round((bbDone/bbTotal)*20), 'filled-g');
+
+        /* ── Update OWASP card ── */
+        document.getElementById('owPct').textContent  = owPct;
+        document.getElementById('owDone').textContent = owDone;
+        setTimeout(() => setMiniArc(document.getElementById('owArc'), owPct), 400);
+        buildSegs(document.getElementById('owSegs'), owTotal, owDone, 'filled-c');
+
+        /* ── Update Graduation card ── */
+        document.getElementById('grPct').textContent  = grPct;
+        document.getElementById('grDone').textContent = grDone;
+        setTimeout(() => setMiniArc(document.getElementById('grArc'), grPct), 500);
+        buildSegs(document.getElementById('grSegs'), grTotal, grDone, 'filled-p');
+
+        /* ── Stats bar ── */
+        setTimeout(() => {
+            animNum(document.getElementById('sDone'),   totalDone);
+            animNum(document.getElementById('sTotal'),  totalItems);
+            animNum(document.getElementById('sRemain'), totalItems - totalDone);
+        }, 200);
+
+        /* ── Ring ── */
+        setTimeout(() => setRing(totalPct, totalDone, totalItems), 300);
+
+        /* ── Footer ── */
+        document.getElementById('footStr').textContent =
+            `${totalDone} of ${totalItems} lessons completed · ${totalPct}%`;
+
+        /* ── Assignees ── */
+        initAssignees();
+    }
+
+    /* ── Assignee config ───────────────────────────────────── */
+    const COURSE_META = {
+        bb: { tag: 'Course — 01', title: 'Bug Bounty Hunter',   accent: '#00ff88', accentBg: 'rgba(0,255,136,0.12)',   accentBorder: 'rgba(0,255,136,0.35)',   saveBg: 'linear-gradient(135deg,#00ff88,#00d4ff)', saveColor: '#05050f' },
+        ow: { tag: 'Course — 02', title: 'OWASP Top 10',        accent: '#00e5ff', accentBg: 'rgba(0,229,255,0.12)',   accentBorder: 'rgba(0,229,255,0.35)',   saveBg: 'linear-gradient(135deg,#00e5ff,#7b2cbf)', saveColor: '#05050f' },
+        gr: { tag: 'Course — 03', title: 'Graduation Project',  accent: '#9b5de5', accentBg: 'rgba(155,93,229,0.15)', accentBorder: 'rgba(155,93,229,0.4)',   saveBg: 'linear-gradient(135deg,#9b5de5,#ec4899)', saveColor: '#fff'    },
+    };
+
+    let activeKey = null;
+
+    function getInitials(name) {
+        if (!name || !name.trim()) return '?';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function renderAssignee(key) {
+        const name   = localStorage.getItem('assignee_' + key) || '';
+        const meta   = COURSE_META[key];
+        const initials = getInitials(name);
+
+        const avatar  = document.getElementById(key + 'Avatar');
+        const display = document.getElementById(key + 'NameDisplay');
+        const btn     = avatar.closest('.assignee-row').querySelector('.assign-btn');
+
+        avatar.textContent   = initials;
+        avatar.style.background   = meta.accentBg;
+        avatar.style.color        = meta.accent;
+        avatar.style.borderColor  = meta.accentBorder;
+
+        if (name.trim()) {
+            display.textContent  = name.trim();
+            display.className    = 'assignee-name-display';
+            btn.textContent      = 'Change';
+        } else {
+            display.textContent  = 'Not set';
+            display.className    = 'assignee-name-display empty';
+            btn.textContent      = 'Set';
+        }
+    }
+
+    function openPopover(key) {
+        activeKey = key;
+        const meta    = COURSE_META[key];
+        const saved   = localStorage.getItem('assignee_' + key) || '';
+        const overlay = document.getElementById('popoverOverlay');
+        const input   = document.getElementById('popoverInput');
+        const preview = document.getElementById('popoverAvatarPreview');
+        const saveBtn = document.getElementById('popoverSave');
+
+        document.getElementById('popoverTag').textContent   = meta.tag;
+        document.getElementById('popoverTitle').textContent = 'Set Instructor';
+
+        preview.style.background   = meta.accentBg;
+        preview.style.color        = meta.accent;
+        preview.style.borderColor  = meta.accentBorder;
+        preview.textContent        = getInitials(saved);
+
+        saveBtn.style.background = meta.saveBg;
+        saveBtn.style.color      = meta.saveColor;
+
+        input.value = saved;
+
+        overlay.classList.add('open');
+        setTimeout(() => input.focus(), 120);
+
+        // Live preview initials
+        input.oninput = () => {
+            preview.textContent = getInitials(input.value);
+        };
+
+        // Enter to save
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') saveAssignee();
+            if (e.key === 'Escape') closePopover();
+        };
+    }
+
+    function closePopover() {
+        document.getElementById('popoverOverlay').classList.remove('open');
+        activeKey = null;
+    }
+
+    function closePopoverOnBg(e) {
+        if (e.target === document.getElementById('popoverOverlay')) closePopover();
+    }
+
+    function saveAssignee() {
+        if (!activeKey) return;
+        const name = document.getElementById('popoverInput').value.trim();
+        localStorage.setItem('assignee_' + activeKey, name);
+        renderAssignee(activeKey);
+        closePopover();
+    }
+
+    function clearAssignee() {
+        if (!activeKey) return;
+        localStorage.removeItem('assignee_' + activeKey);
+        renderAssignee(activeKey);
+        closePopover();
+    }
+
+    function initAssignees() {
+        ['bb','ow','gr'].forEach(renderAssignee);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProgress);
+</script>
+</body>
+</html>

@@ -13,7 +13,190 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/layout.css">
   <link rel="stylesheet" href="../css/components.css">
-  <!-- Page styles → src/css/ -->
+  <!-- Page-specific styles -->
+  <style>
+        :root {
+            --bg:        #05050f;
+            --bg2:       #0a0a1a;
+            --bg3:       #0f0f22;
+            --green:     #00ff88;
+            --cyan:      #00e5ff;
+            --purple:    #9b5de5;
+            --amber:     #ffbe0b;
+            --orange:    #f97316;
+            --border:    rgba(255,255,255,0.06);
+            --text:      #e0e0f0;
+            --muted:     #4a4a6a;
+            --mono:      'JetBrains Mono', monospace;
+            --display:   'Outfit', sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:var(--display); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+        /* ── Grid bg ── */
+        .grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none;
+            background-image: linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px), linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+            background-size:60px 60px; mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%); }
+        .orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+        .orb-1 { width:700px; height:700px; background:radial-gradient(circle,rgba(0,255,136,0.08),transparent 70%); top:-200px; left:-200px; }
+        .orb-2 { width:500px; height:500px; background:radial-gradient(circle,rgba(0,229,255,0.07),transparent 70%); bottom:-100px; right:-100px; }
+        .orb-3 { width:400px; height:400px; background:radial-gradient(circle,rgba(155,93,229,0.07),transparent 70%); top:50%; left:60%; }
+        body::after { content:''; position:fixed; inset:0; z-index:999; pointer-events:none;
+            background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px); }
+
+        /* ── Sticky header ── */
+        .site-header {
+            position:sticky; top:0; z-index:100;
+            background:rgba(5,5,15,0.92); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);
+            padding:20px 32px;
+        }
+        .header-inner { max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+
+        .back-btn { display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:0.7rem; letter-spacing:2px; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+        .back-btn:hover { color:var(--green); }
+        .back-btn::before { content:'←'; }
+
+        .header-brand { font-family:var(--mono); font-size:0.65rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+        .header-status { display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:0.65rem; color:var(--green); }
+        .status-dot { width:6px; height:6px; background:var(--green); border-radius:50%; box-shadow:0 0 6px var(--green); animation:pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+        .header-title-row { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+        .header-eyebrow { font-family:var(--mono); font-size:0.65rem; color:var(--green); letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
+        .header-h1 { font-size:clamp(1.5rem,3.5vw,2.4rem); font-weight:900; letter-spacing:-1.5px; color:#fff; line-height:1; }
+        .header-h1 em { font-style:normal; background:linear-gradient(135deg,var(--green),var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .header-sub { font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-top:6px; }
+
+        /* Progress ring + stats */
+        .header-progress-wrap { display:flex; align-items:center; gap:20px; flex-shrink:0; }
+        .prog-ring-wrap { position:relative; width:72px; height:72px; }
+        .prog-ring-wrap svg { width:72px; height:72px; transform:rotate(-90deg); }
+        .prog-ring-track { fill:none; stroke:rgba(255,255,255,0.05); stroke-width:6; }
+        .prog-ring-fill { fill:none; stroke:url(#hg); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1); }
+        .prog-ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .prog-ring-pct { font-family:var(--mono); font-weight:800; font-size:0.9rem; color:var(--green); line-height:1; }
+        .prog-ring-label { font-family:var(--mono); font-size:0.5rem; color:var(--muted); letter-spacing:1px; margin-top:1px; }
+        .prog-stats { display:flex; flex-direction:column; gap:4px; }
+        .prog-stat { font-family:var(--mono); font-size:0.68rem; color:var(--muted); }
+        .prog-stat span { color:var(--green); font-weight:700; }
+
+        /* Linear progress bar */
+        .progress-bar-wrap { position:relative; }
+        .progress-bar { height:3px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--green),var(--cyan)); width:0%; transition:width 0.8s ease; border-radius:99px; }
+        .progress-text { font-family:var(--mono); font-size:0.62rem; color:var(--muted); margin-top:5px; text-align:right; }
+
+        /* ── Main layout ── */
+        .wrap { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:40px 32px 100px; }
+
+        /* ── Phase section ── */
+        .phase-section { margin-bottom:16px; }
+
+        .phase-header {
+            display:flex; align-items:center; gap:16px; padding:18px 22px;
+            background:var(--bg2); border:1px solid var(--border);
+            border-radius:16px; margin-bottom:0; cursor:pointer;
+            transition:all 0.25s; position:relative; overflow:hidden;
+            border-left:3px solid;
+        }
+        .phase-header::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,currentColor,transparent); opacity:0.04; pointer-events:none; }
+        .phase-header:hover { transform:translateX(3px); }
+
+        .phase-header.phase-1 { border-left-color:var(--green); color:var(--green); }
+        .phase-header.phase-2 { border-left-color:var(--cyan);  color:var(--cyan); }
+        .phase-header.phase-3 { border-left-color:var(--purple); color:var(--purple); }
+        .phase-header.phase-4 { border-left-color:var(--orange); color:var(--orange); }
+        .phase-header.phase-5 { border-left-color:var(--amber);  color:var(--amber); }
+        .phase-header.phase-6 { border-left-color:#ec4899; color:#ec4899; }
+
+        .phase-header.phase-1:hover { border-color:rgba(0,255,136,0.3); box-shadow:0 8px 32px rgba(0,255,136,0.06); }
+        .phase-header.phase-2:hover { border-color:rgba(0,229,255,0.3); box-shadow:0 8px 32px rgba(0,229,255,0.06); }
+        .phase-header.phase-3:hover { border-color:rgba(155,93,229,0.3); box-shadow:0 8px 32px rgba(155,93,229,0.06); }
+        .phase-header.phase-4:hover { border-color:rgba(249,115,22,0.3); box-shadow:0 8px 32px rgba(249,115,22,0.06); }
+        .phase-header.phase-5:hover { border-color:rgba(255,190,11,0.3); box-shadow:0 8px 32px rgba(255,190,11,0.06); }
+        .phase-header.phase-6:hover { border-color:rgba(236,72,153,0.3); box-shadow:0 8px 32px rgba(236,72,153,0.06); }
+
+        .phase-number {
+            width:44px; height:44px; border-radius:12px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            font-family:var(--mono); font-weight:800; font-size:1rem; color:#05050f;
+        }
+        .phase-1 .phase-number { background:linear-gradient(135deg,var(--green),var(--cyan)); }
+        .phase-2 .phase-number { background:linear-gradient(135deg,var(--cyan),var(--purple)); }
+        .phase-3 .phase-number { background:linear-gradient(135deg,var(--purple),#ec4899); }
+        .phase-4 .phase-number { background:linear-gradient(135deg,var(--orange),var(--amber)); }
+        .phase-5 .phase-number { background:linear-gradient(135deg,var(--amber),var(--orange)); }
+        .phase-6 .phase-number { background:linear-gradient(135deg,#ec4899,var(--purple)); color:#fff; }
+
+        .phase-info { flex:1; }
+        .phase-info h2 { font-size:1rem; font-weight:700; color:#fff; margin-bottom:3px; }
+        .phase-info p  { font-family:var(--mono); font-size:0.65rem; color:var(--muted); }
+
+        .phase-progress { font-family:var(--mono); font-size:0.7rem; color:var(--muted); white-space:nowrap; }
+        .phase-progress .phase-completed { color:currentColor; font-weight:700; }
+
+        .phase-toggle { font-size:0.75rem; color:var(--muted); margin-left:8px; transition:transform 0.3s; flex-shrink:0; }
+        .phase-section.collapsed .phase-toggle { transform:rotate(-90deg); }
+
+        /* ── Tree content ── */
+        .tree-content {
+            margin-left:22px; border-left:1px solid rgba(255,255,255,0.06);
+            padding-left:22px; overflow:hidden; transition:max-height 0.5s ease;
+            margin-top:4px;
+        }
+        .phase-section.collapsed .tree-content { max-height:0 !important; padding:0; margin:0; }
+
+        /* ── Section title (bug-bounty sub-headers) ── */
+        .section-title {
+            display:flex; align-items:center; gap:8px;
+            font-family:var(--mono); font-size:0.65rem; color:var(--green);
+            letter-spacing:2px; text-transform:uppercase;
+            padding:12px 0 8px; margin-top:8px;
+            border-bottom:1px solid var(--border);
+            margin-bottom:4px;
+        }
+        .section-title::before { content:''; width:8px; height:8px; background:var(--green); border-radius:50%; flex-shrink:0; }
+
+        /* ── Video / lesson item ── */
+        .video-item {
+            position:relative; display:flex; align-items:center;
+            padding:11px 14px; margin:4px 0;
+            background:var(--bg3); border:1px solid var(--border);
+            border-radius:10px; cursor:pointer; transition:all 0.2s;
+        }
+        .video-item::before { content:''; position:absolute; left:-23px; width:22px; height:1px; background:rgba(255,255,255,0.06); }
+        .video-item:hover { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); transform:translateX(4px); }
+        .video-item.completed { background:rgba(0,255,136,0.06); border-color:rgba(0,255,136,0.2); }
+        .video-item.completed .video-title { color:var(--green); }
+        .video-item.completed .video-checkbox { background:var(--green); border-color:var(--green); }
+        .video-item.completed .video-checkbox::after { content:'✓'; color:#05050f; font-weight:900; font-size:0.72rem; }
+
+        .video-checkbox { width:20px; height:20px; border:1.5px solid var(--muted); border-radius:5px; margin-right:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+        .video-title { font-family:var(--display); font-size:0.88rem; color:var(--text); flex-grow:1; }
+
+        .quiz-icon { font-family:var(--mono); font-size:0.62rem; letter-spacing:1px; padding:3px 8px; border-radius:6px; background:rgba(155,93,229,0.15); color:var(--purple); border:1px solid rgba(155,93,229,0.2); margin-left:8px; flex-shrink:0; }
+
+        /* ── Footer ── */
+        .foot { border-top:1px solid var(--border); padding-top:24px; margin-top:40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+        .foot-l { font-family:var(--mono); font-size:0.65rem; color:var(--muted); }
+        .foot-r { font-family:var(--mono); font-size:0.65rem; color:var(--green); }
+
+        /* ── Animations ── */
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .anim { opacity:0; animation:slideUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .d1{animation-delay:0.1s} .d2{animation-delay:0.18s} .d3{animation-delay:0.26s}
+
+        @media(max-width:600px) {
+            .site-header { padding:16px 18px; }
+            .wrap { padding:24px 18px 80px; }
+            .header-progress-wrap { display:none; }
+            .phase-header { padding:14px 16px; }
+            .phase-info h2 { font-size:0.9rem; }
+        }
+    </style>
 </head>
 <body>
 

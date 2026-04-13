@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals Planner</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <!-- Page-specific styles -->
+  <style>
+:root {
+  --bg:#05050f; --bg2:#0a0a1a; --bg3:#0f0f22;
+  --green:#00ff88; --cyan:#00e5ff; --purple:#9b5de5; --amber:#ffbe0b; --red:#ff4d6d;
+  --border:rgba(255,255,255,0.06); --text:#e0e0f0; --muted:#4a4a6a;
+  --mono:'JetBrains Mono',monospace; --display:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box} html{scroll-behavior:smooth}
+body{font-family:var(--display);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);
+  background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)}
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0}
+.orb-1{width:700px;height:700px;background:radial-gradient(circle,rgba(0,255,136,.08),transparent 70%);top:-200px;left:-200px}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(0,229,255,.07),transparent 70%);bottom:-100px;right:-100px}
+.orb-3{width:400px;height:400px;background:radial-gradient(circle,rgba(155,93,229,.07),transparent 70%);top:50%;left:60%}
+body::after{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 32px 100px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0;margin-bottom:40px;position:relative}
+.topbar::after{content:'';position:absolute;bottom:-20px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,229,255,.08));border:1px solid rgba(0,255,136,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.topbar-titles{display:flex;flex-direction:column;gap:2px}
+.topbar-brand{font-family:var(--mono);font-size:.6rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+.topbar-page{font-family:var(--display);font-size:.95rem;font-weight:700;color:#fff;letter-spacing:-.3px}
+.topbar-back{font-family:var(--mono);font-size:.63rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:7px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.12);padding:9px 16px;border-radius:10px;transition:all .2s;letter-spacing:1px;text-transform:uppercase}
+.topbar-back:hover{background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.25);transform:translateX(-2px)}
+.hero{margin-bottom:48px}
+.hero-eyebrow{font-family:var(--mono);font-size:.72rem;color:var(--amber);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:inline-flex;align-items:center;gap:12px}
+.hero-eyebrow::before{content:'';width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--amber))}
+.hero-eyebrow::after{content:'';width:32px;height:1px;background:linear-gradient(90deg,var(--amber),transparent)}
+.hero-h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:.95;letter-spacing:-3px;color:#fff;margin-bottom:16px}
+.hero-h1 em{font-style:normal;background:linear-gradient(135deg,var(--amber),#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-family:var(--mono);font-size:.78rem;color:var(--muted);line-height:1.8}
+.tab-bar{display:flex;gap:0;margin-bottom:40px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:5px;position:relative}
+.tab-btn{flex:1;font-family:var(--mono);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;padding:14px 0;border:none;background:transparent;color:var(--muted);border-radius:12px;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;position:relative}
+.tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,.03)}
+.tab-btn.active{font-weight:700;color:#000;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.tab-btn[data-tab="daily"].active{background:var(--green)}
+.tab-btn[data-tab="weekly"].active{background:var(--cyan)}
+.tab-btn[data-tab="monthly"].active{background:var(--amber)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.sh{display:flex;align-items:center;gap:18px;margin-bottom:20px}
+.sh-text{font-family:var(--mono);font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.sh-line{flex:1;height:1px;background:var(--border)}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.stat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden}
+.stat-pill::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-pill.g::after{background:linear-gradient(90deg,var(--green),transparent)}
+.stat-pill.c::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+.stat-pill.a::after{background:linear-gradient(90deg,var(--amber),transparent)}
+.stat-pill-val{font-family:var(--mono);font-size:2rem;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-pill.g .stat-pill-val{background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-pill.c .stat-pill-val{color:var(--cyan)}.stat-pill.a .stat-pill-val{color:var(--amber)}
+.stat-pill-lbl{font-family:var(--mono);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.progress-section{margin-bottom:28px}
+.progress-label-row{display:flex;justify-content:space-between;margin-bottom:8px}
+.progress-label{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.progress-pct{font-family:var(--mono);font-size:.6rem;font-weight:700}
+.prog-bar{height:4px;background:rgba(255,255,255,.05);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;width:0%;transition:width .7s cubic-bezier(.16,1,.3,1)}
+.add-form{background:var(--bg2);border:1px solid var(--border);border-radius:18px;margin-bottom:32px;position:relative;overflow:hidden}
+.add-form::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--cyan))}
+.add-form.weekly-form::before{background:linear-gradient(90deg,var(--cyan),var(--purple))}
+.add-form.monthly-form::before{background:linear-gradient(90deg,var(--amber),#ff9500)}
+.add-form-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:none;border:none;cursor:pointer;color:var(--green);font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;transition:background .2s}
+.add-form-toggle:hover{background:rgba(255,255,255,.02)}
+.weekly-form .add-form-toggle{color:var(--cyan)}
+.monthly-form .add-form-toggle{color:var(--amber)}
+.add-form-toggle-icon{font-size:1.1rem;transition:transform .3s cubic-bezier(.16,1,.3,1);line-height:1}
+.add-form.open .add-form-toggle-icon{transform:rotate(45deg)}
+.add-form-body{padding:0 22px 22px;display:none}
+.add-form.open .add-form-body{display:block}
+.form-row-full{display:grid;grid-template-columns:1fr 140px 140px;gap:10px;margin-bottom:12px}
+.form-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.field{display:flex;flex-direction:column;gap:7px}
+.field-label{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.field-input,.field-select{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:var(--mono);font-size:.78rem;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.field-input:focus{border-color:rgba(0,255,136,.4)}
+.weekly-form .field-input:focus{border-color:rgba(0,229,255,.4)}
+.monthly-form .field-input:focus{border-color:rgba(255,190,11,.4)}
+.field-select option{background:var(--bg3)}
+.btn-add{font-family:var(--mono);font-size:.7rem;letter-spacing:2px;font-weight:700;text-transform:uppercase;padding:11px 22px;border:none;border-radius:10px;cursor:pointer;background:var(--green);color:#000;transition:all .2s;white-space:nowrap}
+.btn-add:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-add.cyan{background:var(--cyan)}
+.btn-add.amber{background:var(--amber)}
+.goals-list{display:flex;flex-direction:column;gap:8px}
+.goal-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .2s;cursor:pointer}
+.goal-item:hover{background:var(--bg3)}
+.goal-item.done{opacity:.5}
+.goal-item.done .goal-title{text-decoration:line-through;color:var(--muted)}
+.goal-check{width:22px;height:22px;border-radius:7px;border:2px solid rgba(0,255,136,.35);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .2s}
+.goal-item.done .goal-check{background:var(--green);border-color:var(--green);color:#000}
+.goal-item:not(.done):hover .goal-check{border-color:rgba(0,255,136,.7)}
+.goal-item.weekly-goal .goal-check{border-color:rgba(0,229,255,.35)}
+.goal-item.weekly-goal.done .goal-check{background:var(--cyan);border-color:var(--cyan);color:#000}
+.goal-item.weekly-goal:not(.done):hover .goal-check{border-color:rgba(0,229,255,.7)}
+.goal-item.monthly-goal .goal-check{border-color:rgba(255,190,11,.35)}
+.goal-item.monthly-goal.done .goal-check{background:var(--amber);border-color:var(--amber);color:#000}
+.goal-item.monthly-goal:not(.done):hover .goal-check{border-color:rgba(255,190,11,.7)}
+.goal-body{flex:1;min-width:0}
+.goal-title{font-size:.92rem;font-weight:700;color:#fff;line-height:1.3;margin-bottom:5px}
+.goal-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.goal-tag{font-family:var(--mono);font-size:.56rem;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+.pri-high{background:rgba(255,77,109,.1);color:var(--red);border:1px solid rgba(255,77,109,.2)}
+.pri-medium{background:rgba(255,190,11,.1);color:var(--amber);border:1px solid rgba(255,190,11,.2)}
+.pri-low{background:rgba(0,229,255,.08);color:var(--cyan);border:1px solid rgba(0,229,255,.15)}
+.cat-tag{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
+.type-tag-weekly{background:rgba(0,229,255,.08);color:var(--cyan);border:1px solid rgba(0,229,255,.2)}
+.type-tag-monthly{background:rgba(255,190,11,.08);color:var(--amber);border:1px solid rgba(255,190,11,.2)}
+.goal-date-tag{font-family:var(--mono);font-size:.56rem;color:var(--muted)}
+.goal-del{background:none;border:1px solid transparent;color:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.65rem;transition:all .2s;flex-shrink:0}
+.goal-del:hover{border-color:rgba(255,77,109,.3);color:var(--red)}
+.day-strip-wrap{display:flex;align-items:center;gap:8px;margin-bottom:24px}
+.day-arrow{background:var(--bg2);border:1px solid var(--border);color:var(--green);width:36px;height:36px;border-radius:10px;font-size:1.4rem;line-height:1;cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;padding-bottom:2px}
+.day-arrow:hover{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.35);transform:scale(1.08)}
+.day-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;flex:1}
+.day-btn{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.day-btn:hover{border-color:rgba(0,255,136,.2)}
+.day-btn.active{border-color:var(--green);background:rgba(0,255,136,.06)}
+.day-btn.is-today .day-btn-num{color:var(--amber)}
+.day-btn.active .day-btn-name,.day-btn.active .day-btn-num{color:var(--green)}
+.day-btn-name{font-family:var(--mono);font-size:.48rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.day-btn-num{font-family:var(--mono);font-size:.85rem;font-weight:700}
+.day-dot{width:4px;height:4px;border-radius:50%;background:var(--green);margin:4px auto 0;opacity:0;transition:opacity .2s}
+.day-btn.has-goals .day-dot{opacity:1}
+.week-group{background:var(--bg2);border:1px solid var(--border);border-radius:16px;margin-bottom:14px;overflow:hidden}
+.week-group-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .2s}
+.week-group-header:hover{background:var(--bg3)}
+.week-group-title{font-family:var(--mono);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.wg-cyan .week-group-title{color:var(--cyan)}.wg-amber .week-group-title{color:var(--amber)}
+.week-group-stats{display:flex;align-items:center;gap:10px}
+.wg-badge{font-family:var(--mono);font-size:.6rem;padding:3px 10px;border-radius:20px}
+.wg-badge.done-all{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.wg-badge.in-prog{background:rgba(0,229,255,.08);color:var(--cyan);border:1px solid rgba(0,229,255,.15)}
+.wg-badge.empty{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
+.week-group-toggle{font-size:.7rem;color:var(--muted);transition:transform .25s}
+.week-group.collapsed .week-group-toggle{transform:rotate(-90deg)}
+.week-group-body{padding:12px 14px}
+.week-group.collapsed .week-group-body{display:none}
+.day-subheader{font-family:var(--mono);font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 4px 6px;display:flex;align-items:center;gap:10px}
+.day-subheader::after{content:'';flex:1;height:1px;background:var(--border)}
+.day-subheader.has-items{color:var(--green)}
+.section-subheader{font-family:var(--mono);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;padding:14px 4px 8px;display:flex;align-items:center;gap:10px}
+.section-subheader::after{content:'';flex:1;height:1px;background:var(--border)}
+.section-subheader.cyan{color:var(--cyan)}
+.section-subheader.amber{color:var(--amber)}
+.nav-ctrl{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.nav-ctrl-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:.72rem;transition:all .2s}
+.nav-ctrl-btn:hover{border-color:rgba(255,255,255,.15)}
+.nav-ctrl-label{font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+#tab-weekly .nav-ctrl-label{color:var(--cyan)}
+#tab-monthly .nav-ctrl-label{color:var(--amber)}
+.empty-state{text-align:center;padding:48px 20px}
+.empty-icon{font-size:2rem;display:block;margin-bottom:10px;opacity:.4}
+.empty-title{font-family:var(--mono);font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.empty-sub{font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:6px;opacity:.6}
+/* ── Segments Ring Layout ── */
+.goals-with-ring{display:grid;grid-template-columns:1fr 260px;gap:32px;align-items:start}
+.seg-ring-wrap{
+  position:sticky;top:24px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  padding:8px 0 0;
+}
+.seg-ring-label{font-family:var(--mono);font-size:.52rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.seg-ring-svg{width:220px;height:220px;filter:drop-shadow(0 0 24px rgba(0,255,136,.18));transition:filter .3s}
+.seg-ring-wrap:hover .seg-ring-svg{filter:drop-shadow(0 0 36px rgba(0,255,136,.28))}
+.seg-ring-info{text-align:center;width:100%}
+.seg-ring-sub{font-family:var(--mono);font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px}
+.seg-ring-cats{display:flex;flex-direction:column;gap:7px;width:100%;margin-top:8px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05)}
+.seg-ring-cat-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.seg-ring-cat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.seg-ring-cat-name{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:1px;flex:1}
+.seg-ring-cat-count{font-family:var(--mono);font-size:.55rem;font-weight:700;color:rgba(255,255,255,.5)}
+@media(max-width:800px){
+  .goals-with-ring{grid-template-columns:1fr}
+  .seg-ring-wrap{position:static;flex-direction:column;align-items:center}
+  .seg-ring-svg{width:180px;height:180px}
+}
+padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:40px}
+.foot-l{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.foot-r{font-family:var(--mono);font-size:.68rem;color:var(--amber)}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.anim{opacity:0;animation:slideUp .6s cubic-bezier(.16,1,.3,1) forwards}
+.d0{animation-delay:.05s}.d1{animation-delay:.15s}.d2{animation-delay:.25s}.d3{animation-delay:.35s}.d4{animation-delay:.45s}
+@media(max-width:700px){.form-row-full{grid-template-columns:1fr}.wrap{padding:0 16px 80px}.stats-row{grid-template-columns:1fr 1fr}.day-strip{gap:3px}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="wrap">
+
+  <div class="topbar anim d0">
+    <div class="topbar-left">
+      <div class="topbar-logo">🎯</div>
+      <div class="topbar-titles">
+        <span class="topbar-brand">Learning OS</span>
+        <span class="topbar-page">Goals Planner</span>
+      </div>
+    </div>
+    <a href="index.html" class="topbar-back">← Dashboard</a>
+  </div>
+
+  <div class="hero anim d1">
+    <div class="hero-eyebrow">Plan &amp; Achieve</div>
+    <h1 class="hero-h1">YOUR<br><em>GOALS</em></h1>
+    <p class="hero-sub">// أضف أهداف يومية أو أسبوعية أو شهرية مباشرةً<br>// الأهداف اليومية بتتجمع في الأسبوع والشهر تلقائياً<br>// Small wins compound into big results.</p>
+  </div>
+
+  <div class="tab-bar anim d2">
+    <button class="tab-btn active" data-tab="daily">📅 Daily</button>
+    <button class="tab-btn" data-tab="weekly">📆 Weekly</button>
+    <button class="tab-btn" data-tab="monthly">🗓 Monthly</button>
+  </div>
+
+  <!-- ═══════════════════ DAILY ═══════════════════ -->
+  <div class="tab-pane active" id="tab-daily">
+    <div class="day-strip-wrap anim d2">
+      <button class="day-arrow" onclick="changeDayPage(-1)" title="Previous week">‹</button>
+      <div class="day-strip" id="dayStrip"></div>
+      <button class="day-arrow" onclick="changeDayPage(1)" title="Next week">›</button>
+    </div>
+    <div class="stats-row anim d3">
+      <div class="stat-pill g"><div class="stat-pill-val" id="dS1">0</div><div class="stat-pill-lbl">Total</div></div>
+      <div class="stat-pill c"><div class="stat-pill-val" id="dS2">0</div><div class="stat-pill-lbl">Done</div></div>
+      <div class="stat-pill a"><div class="stat-pill-val" id="dS3">0%</div><div class="stat-pill-lbl">Rate</div></div>
+    </div>
+    <div class="progress-section anim d3">
+      <div class="progress-label-row"><span class="progress-label">Daily Progress</span><span class="progress-pct" id="dPct" style="color:var(--green)">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="dBar" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+    </div>
+    <div class="add-form anim d3" id="dForm">
+      <button class="add-form-toggle" onclick="toggleForm('dForm')">
+        <span>// + Add Daily Goal</span>
+        <span class="add-form-toggle-icon">+</span>
+      </button>
+      <div class="add-form-body">
+        <div class="form-row-full">
+          <div class="field"><label class="field-label">Goal Title</label><input class="field-input" id="dTitle" type="text" placeholder="e.g. Finish IDOR lab, study XSS writeup..."></div>
+          <div class="field"><label class="field-label">Priority</label>
+            <select class="field-select" id="dPri">
+              <option value="high">🔴 High</option><option value="medium" selected>🟡 Medium</option><option value="low">🔵 Low</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Category</label>
+            <select class="field-select" id="dCat">
+              <option value="study">📚 Study</option><option value="bugbounty">🐛 Bug Bounty</option>
+              <option value="lab">🧪 Lab</option><option value="writeup">📝 Writeup</option><option value="other">⚡ Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="field-label">Notes (optional)</label><input class="field-input" id="dNotes" type="text" placeholder="Any extra details..."></div>
+          <button class="btn-add" onclick="addDailyGoal()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+    <!-- Daily progress visual -->
+    <div class="sh"><span class="sh-text" id="dLabel">Today's Goals</span><div class="sh-line"></div></div>
+    <div class="goals-with-ring">
+      <div class="goals-list" id="dailyList"></div>
+      <div class="seg-ring-wrap" id="dProgressVisual"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ WEEKLY ═══════════════════ -->
+  <div class="tab-pane" id="tab-weekly">
+    <div class="nav-ctrl anim d2">
+      <button class="nav-ctrl-btn" onclick="changeWeek(-1)">← Prev</button>
+      <span class="nav-ctrl-label" id="weekLabel">This Week</span>
+      <button class="nav-ctrl-btn" onclick="changeWeek(1)">Next →</button>
+    </div>
+    <div class="stats-row anim d2">
+      <div class="stat-pill g"><div class="stat-pill-val" id="wS1">0</div><div class="stat-pill-lbl">Total</div></div>
+      <div class="stat-pill c"><div class="stat-pill-val" id="wS2">0</div><div class="stat-pill-lbl">Done</div></div>
+      <div class="stat-pill a"><div class="stat-pill-val" id="wS3">0%</div><div class="stat-pill-lbl">Rate</div></div>
+    </div>
+    <div class="progress-section anim d2">
+      <div class="progress-label-row"><span class="progress-label">Weekly Progress</span><span class="progress-pct" id="wPct" style="color:var(--cyan)">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="wBar" style="background:linear-gradient(90deg,var(--cyan),var(--purple))"></div></div>
+    </div>
+
+    <!-- Weekly-specific add form -->
+    <div class="add-form weekly-form anim d3" id="wForm">
+      <button class="add-form-toggle" onclick="toggleForm('wForm')">
+        <span>// + Add Weekly Goal</span>
+        <span class="add-form-toggle-icon">+</span>
+      </button>
+      <div class="add-form-body">
+        <div class="form-row-full">
+          <div class="field"><label class="field-label">Goal Title</label><input class="field-input" id="wTitle" type="text" placeholder="e.g. Complete recon methodology, finish 5 labs..."></div>
+          <div class="field"><label class="field-label">Priority</label>
+            <select class="field-select" id="wPri">
+              <option value="high">🔴 High</option><option value="medium" selected>🟡 Medium</option><option value="low">🔵 Low</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Category</label>
+            <select class="field-select" id="wCat">
+              <option value="study">📚 Study</option><option value="bugbounty">🐛 Bug Bounty</option>
+              <option value="lab">🧪 Lab</option><option value="writeup">📝 Writeup</option><option value="other">⚡ Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="field-label">Notes (optional)</label><input class="field-input" id="wNotes" type="text" placeholder="Any extra details..."></div>
+          <button class="btn-add cyan" onclick="addWeeklyGoal()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly progress ring + category bars -->
+    <div class="sh anim d3"><span class="sh-text" id="wGoalsHeading">This Week's Goals</span><div class="sh-line"></div></div>
+    <div class="goals-with-ring">
+      <div class="goals-list" id="weeklyOwnList"></div>
+      <div class="seg-ring-wrap" id="wProgressVisual"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ MONTHLY ═══════════════════ -->
+  <div class="tab-pane" id="tab-monthly">
+    <div class="nav-ctrl anim d2">
+      <button class="nav-ctrl-btn" onclick="changeMonth(-1)">← Prev</button>
+      <span class="nav-ctrl-label" id="monthLabel">April 2026</span>
+      <button class="nav-ctrl-btn" onclick="changeMonth(1)">Next →</button>
+    </div>
+    <div class="stats-row anim d2">
+      <div class="stat-pill g"><div class="stat-pill-val" id="mS1">0</div><div class="stat-pill-lbl">Total</div></div>
+      <div class="stat-pill c"><div class="stat-pill-val" id="mS2">0</div><div class="stat-pill-lbl">Done</div></div>
+      <div class="stat-pill a"><div class="stat-pill-val" id="mS3">0%</div><div class="stat-pill-lbl">Rate</div></div>
+    </div>
+    <div class="progress-section anim d2">
+      <div class="progress-label-row"><span class="progress-label">Monthly Progress</span><span class="progress-pct" id="mPct" style="color:var(--amber)">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="mBar" style="background:linear-gradient(90deg,var(--amber),#ff9500)"></div></div>
+    </div>
+
+    <!-- Monthly-specific add form -->
+    <div class="add-form monthly-form anim d3" id="mForm">
+      <button class="add-form-toggle" onclick="toggleForm('mForm')">
+        <span>// + Add Monthly Goal</span>
+        <span class="add-form-toggle-icon">+</span>
+      </button>
+      <div class="add-form-body">
+        <div class="form-row-full">
+          <div class="field"><label class="field-label">Goal Title</label><input class="field-input" id="mTitle" type="text" placeholder="e.g. Get first CVE, complete 30 labs, earn cert..."></div>
+          <div class="field"><label class="field-label">Priority</label>
+            <select class="field-select" id="mPri">
+              <option value="high">🔴 High</option><option value="medium" selected>🟡 Medium</option><option value="low">🔵 Low</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label">Category</label>
+            <select class="field-select" id="mCat">
+              <option value="study">📚 Study</option><option value="bugbounty">🐛 Bug Bounty</option>
+              <option value="lab">🧪 Lab</option><option value="writeup">📝 Writeup</option><option value="other">⚡ Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="field-label">Notes (optional)</label><input class="field-input" id="mNotes" type="text" placeholder="Any extra details..."></div>
+          <button class="btn-add amber" onclick="addMonthlyGoal()">+ ADD</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly progress ring + category bars -->
+    <div class="sh anim d3"><span class="sh-text" id="mGoalsHeading">This Month's Goals</span><div class="sh-line"></div></div>
+    <div class="goals-with-ring">
+      <div class="goals-list" id="monthlyOwnList"></div>
+      <div class="seg-ring-wrap" id="mProgressVisual"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="foot-l">// set the goal · do the work · level up 🎯</span>
+    <span class="foot-r" id="footStr">—</span>
+  </div>
+</div>
+
+<script>
+const DAYS_SHORT  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYS_FULL   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAT_ICON    = {study:'📚',bugbounty:'🐛',lab:'🧪',writeup:'📝',other:'⚡'};
+const CAT_LABEL   = {study:'Study',bugbounty:'Bug Bounty',lab:'Lab',writeup:'Writeup',other:'Other'};
+const PRI_CLASS   = {high:'pri-high',medium:'pri-medium',low:'pri-low'};
+const PRI_LABEL   = {high:'HIGH',medium:'MED',low:'LOW'};
+const STORAGE_KEY = 'goals-v3';
+
+// ── Helpers ──────────────────────────────────────────────
+function fmtDate(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function parseDate(s){ return new Date(s+'T12:00:00'); }
+function weekMonday(d,off=0){ const c=new Date(d); c.setDate(d.getDate()-((d.getDay()+6)%7)+off*7); c.setHours(0,0,0,0); return c; }
+function weekDates(mon){ return Array.from({length:7},(_,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); return d; }); }
+function monthDates(base,off=0){ const d=new Date(base.getFullYear(),base.getMonth()+off,1); const days=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); return Array.from({length:days},(_,i)=>new Date(d.getFullYear(),d.getMonth(),i+1)); }
+function weekRangeLabel(mon){ const sun=new Date(mon); sun.setDate(mon.getDate()+6); const fmt=x=>`${x.getDate()} ${MONTHS_FULL[x.getMonth()].slice(0,3)}`; return `${fmt(mon)} — ${fmt(sun)} ${sun.getFullYear()}`; }
+function weekKey(mon){ return `w_${fmtDate(mon)}`; }
+function monthKey(d){ return `m_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function loadAll(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function saveAll(g){ localStorage.setItem(STORAGE_KEY,JSON.stringify(g)); }
+function goalsForDates(strs){ const s=new Set(strs); return loadAll().filter(g=>g.type==='daily'&&s.has(g.date)); }
+function escHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+let selDate='', weekOffset=0, monthOffset=0, dayPageOffset=0;
+selDate=fmtDate(TODAY);
+
+// ── Toggle add forms ─────────────────────────────────────
+function toggleForm(id){
+  const form=document.getElementById(id);
+  form.classList.toggle('open');
+  if(form.classList.contains('open')){
+    // focus first input when opened
+    const inp=form.querySelector('.field-input');
+    if(inp) setTimeout(()=>inp.focus(),50);
+  }
+}
+
+// ── Tabs ─────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='weekly') renderWeekly();
+    if(btn.dataset.tab==='monthly') renderMonthly();
+  });
+});
+
+// ── Add Goal Helpers ──────────────────────────────────────
+function shakeInput(el){ el.style.borderColor='rgba(255,77,109,.6)'; el.style.animation='shake .3s ease'; setTimeout(()=>{el.style.borderColor='';el.style.animation='';},500); }
+
+function addDailyGoal(){
+  const title=document.getElementById('dTitle').value.trim();
+  if(!title){ shakeInput(document.getElementById('dTitle')); return; }
+  const all=loadAll();
+  all.push({id:Date.now(),type:'daily',date:selDate,title,priority:document.getElementById('dPri').value,category:document.getElementById('dCat').value,notes:document.getElementById('dNotes').value.trim(),done:false,createdAt:new Date().toISOString()});
+  saveAll(all);
+  document.getElementById('dTitle').value='';
+  document.getElementById('dNotes').value='';
+  renderAll();
+}
+
+function addWeeklyGoal(){
+  const title=document.getElementById('wTitle').value.trim();
+  if(!title){ shakeInput(document.getElementById('wTitle')); return; }
+  const mon=weekMonday(TODAY,weekOffset);
+  const all=loadAll();
+  all.push({id:Date.now(),type:'weekly',weekKey:weekKey(mon),title,priority:document.getElementById('wPri').value,category:document.getElementById('wCat').value,notes:document.getElementById('wNotes').value.trim(),done:false,createdAt:new Date().toISOString()});
+  saveAll(all);
+  document.getElementById('wTitle').value='';
+  document.getElementById('wNotes').value='';
+  renderWeekly();
+  updateFooter();
+}
+
+function addMonthlyGoal(){
+  const title=document.getElementById('mTitle').value.trim();
+  if(!title){ shakeInput(document.getElementById('mTitle')); return; }
+  const refDate=new Date(TODAY.getFullYear(),TODAY.getMonth()+monthOffset,1);
+  const all=loadAll();
+  all.push({id:Date.now(),type:'monthly',monthKey:monthKey(refDate),title,priority:document.getElementById('mPri').value,category:document.getElementById('mCat').value,notes:document.getElementById('mNotes').value.trim(),done:false,createdAt:new Date().toISOString()});
+  saveAll(all);
+  document.getElementById('mTitle').value='';
+  document.getElementById('mNotes').value='';
+  renderMonthly();
+  updateFooter();
+}
+
+function toggleGoal(id){ const all=loadAll(); const g=all.find(x=>x.id===id); if(g){g.done=!g.done;saveAll(all);} renderAll(); }
+function deleteGoal(id,e){ e.stopPropagation(); saveAll(loadAll().filter(x=>x.id!==id)); renderAll(); }
+function renderAll(){ renderDaily(); renderWeekly(); renderMonthly(); }
+
+// ── Goal Item HTML ────────────────────────────────────────
+function goalItemHtml(g){
+  const extraClass = g.type==='weekly'?'weekly-goal':g.type==='monthly'?'monthly-goal':'';
+  const typeTag = g.type==='weekly'?`<span class="goal-tag type-tag-weekly">📆 WEEKLY</span>`:g.type==='monthly'?`<span class="goal-tag type-tag-monthly">🗓 MONTHLY</span>`:'';
+  return `<div class="goal-item ${extraClass} ${g.done?'done':''}" onclick="toggleGoal(${g.id})">
+    <div class="goal-check">${g.done?'✓':''}</div>
+    <div class="goal-body">
+      <div class="goal-title">${escHtml(g.title)}</div>
+      <div class="goal-meta">
+        ${typeTag}
+        <span class="goal-tag ${PRI_CLASS[g.priority]}">${PRI_LABEL[g.priority]}</span>
+        <span class="goal-tag cat-tag">${CAT_ICON[g.category]} ${CAT_LABEL[g.category]}</span>
+        ${g.notes?`<span class="goal-date-tag">${escHtml(g.notes)}</span>`:''}
+      </div>
+    </div>
+    <button class="goal-del" onclick="deleteGoal(${g.id},event)">✕</button>
+  </div>`;
+}
+
+function setStats(ids,goals,barId,pctId){
+  const total=goals.length,done=goals.filter(x=>x.done).length,pct=total>0?Math.round((done/total)*100):0;
+  document.getElementById(ids[0]).textContent=total;
+  document.getElementById(ids[1]).textContent=done;
+  document.getElementById(ids[2]).textContent=pct+'%';
+  document.getElementById(pctId).textContent=pct+'%';
+  setTimeout(()=>{document.getElementById(barId).style.width=pct+'%';},150);
+}
+
+// ── DAILY ─────────────────────────────────────────────────
+function changeDayPage(dir){ dayPageOffset+=dir; renderDaily(); }
+
+function buildDayStrip(){
+  const strip=document.getElementById('dayStrip'); strip.innerHTML='';
+  // Center of the current 7-day window
+  const centerDay=new Date(TODAY); centerDay.setDate(TODAY.getDate()+dayPageOffset*7);
+  // Show Mon–Sun of the week containing centerDay
+  const mon=weekMonday(centerDay,0);
+  const days=weekDates(mon);
+  // Update range label removed — arrows handle navigation
+  days.forEach(d=>{
+    const ds=fmtDate(d);
+    const goals=loadAll().filter(g=>g.type==='daily'&&g.date===ds);
+    const isToday=ds===fmtDate(TODAY);
+    const btn=document.createElement('div');
+    btn.className=`day-btn${ds===selDate?' active':''}${isToday&&ds!==selDate?' is-today':''}${goals.length?' has-goals':''}`;
+    btn.innerHTML=`<div class="day-btn-name">${DAYS_SHORT[d.getDay()]}</div><div class="day-btn-num">${d.getDate()}</div><div class="day-dot"></div>`;
+    btn.addEventListener('click',()=>{ selDate=ds; renderDaily(); });
+    strip.appendChild(btn);
+  });
+}
+
+function renderDaily(){
+  buildDayStrip();
+  const goals=loadAll().filter(g=>g.type==='daily'&&g.date===selDate);
+  const d=parseDate(selDate);
+  const isToday=selDate===fmtDate(TODAY);
+  document.getElementById('dLabel').textContent=isToday?`Today — ${d.getDate()} ${MONTHS_FULL[d.getMonth()]}`:`${DAYS_FULL[d.getDay()]}, ${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
+  const sorted=[...goals].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1)||a.done-b.done);
+  document.getElementById('dailyList').innerHTML=sorted.length?sorted.map(goalItemHtml).join(''):`<div class="empty-state"><span class="empty-icon">🎯</span><div class="empty-title">No goals for this day</div><div class="empty-sub">Add your first daily goal above</div></div>`;
+  setStats(['dS1','dS2','dS3'],goals,'dBar','dPct');
+  renderProgressVisual('dProgressVisual', goals, 'var(--green)');
+  updateFooter();
+}
+
+// ── Segments Ring ─────────────────────────────────────────
+const CAT_COLORS={study:'#00ff88',bugbounty:'#ff4d6d',lab:'#00e5ff',writeup:'#9b5de5',other:'#ffbe0b'};
+
+function renderProgressVisual(containerId, goals, accentColor){
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  const total=goals.length, done=goals.filter(x=>x.done).length;
+  const pct=total>0?Math.round((done/total)*100):0;
+
+  const isGreen=accentColor==='var(--green)';
+  const isCyan=accentColor==='var(--cyan)';
+  const pctColor=isGreen?'#00ff88':isCyan?'#00e5ff':'#ffbe0b';
+  const gradA=isGreen?'#00ff88':isCyan?'#00e5ff':'#ffbe0b';
+  const gradB=isGreen?'#00c9ff':isCyan?'#9b5de5':'#ff6b35';
+  const gId=containerId.replace(/[^a-z]/gi,'');
+
+  if(!total){
+    container.innerHTML=`
+      <svg class="seg-ring-svg" viewBox="0 0 220 220">
+        <circle cx="110" cy="110" r="80" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="22" stroke-dasharray="10 10"/>
+        <text x="110" y="106" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="rgba(255,255,255,.15)" letter-spacing="2">NO</text>
+        <text x="110" y="124" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="rgba(255,255,255,.15)" letter-spacing="2">GOALS</text>
+      </svg>
+      <div class="seg-ring-info">
+        <span class="seg-ring-pct" style="color:rgba(255,255,255,.15)">—</span>
+        <span class="seg-ring-sub">Add goals to track</span>
+      </div>`;
+    return;
+  }
+
+  const R=80, sw=20;
+  const allDone=done===total;
+  const cx=110, cy=110;
+
+  // Draw arc using SVG path — works correctly at ALL percentages including 100%
+  function describeArc(pct){
+    if(pct>=100){
+      // Full circle as two semicircles (a single 360° arc is invalid in SVG)
+      return `M ${cx} ${cy-R} A ${R} ${R} 0 1 1 ${cx-0.01} ${cy-R}`;
+    }
+    const angle=(pct/100)*360;
+    const rad=(angle-90)*Math.PI/180;
+    const x=cx+R*Math.cos(rad);
+    const y=cy+R*Math.sin(rad);
+    const large=angle>180?1:0;
+    return `M ${cx} ${cy-R} A ${R} ${R} 0 ${large} 1 ${x} ${y}`;
+  }
+
+  // Category legend
+  const catCounts={};
+  goals.forEach(g=>{
+    if(!catCounts[g.category]) catCounts[g.category]={total:0,done:0};
+    catCounts[g.category].total++;
+    if(g.done) catCounts[g.category].done++;
+  });
+  const catLegend=Object.entries(catCounts).map(([cat,c])=>`
+    <div class="seg-ring-cat-row">
+      <div class="seg-ring-cat-dot" style="background:${CAT_COLORS[cat]};box-shadow:0 0 6px ${CAT_COLORS[cat]}88"></div>
+      <span class="seg-ring-cat-name">${CAT_ICON[cat]} ${CAT_LABEL[cat]}</span>
+      <span class="seg-ring-cat-count">${c.done}/${c.total}</span>
+    </div>`).join('');
+
+  container.innerHTML=`
+    <svg class="seg-ring-svg" viewBox="0 0 220 220">
+      <defs>
+        <linearGradient id="gr${gId}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${gradA}"/>
+          <stop offset="100%" stop-color="${gradB}"/>
+        </linearGradient>
+      </defs>
+      <!-- Track -->
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="${sw}"/>
+      <!-- Arc fill -->
+      ${pct>0?`<path d="${describeArc(pct)}" fill="none" stroke="url(#gr${gId})" stroke-width="${sw}" stroke-linecap="${pct>=100?'butt':'round'}"/>`:``}
+      <!-- Center icon -->
+      <text x="${cx}" y="${cy-14}" text-anchor="middle" dominant-baseline="central" font-size="26">${allDone?'🎯':'⚡'}</text>
+      <!-- Center done/total -->
+      <text x="${cx}" y="${cy+16}" text-anchor="middle" dominant-baseline="central"
+        font-family="'JetBrains Mono',monospace" font-size="20" font-weight="900" fill="${pctColor}">${done}/${total}</text>
+    </svg>
+    <div class="seg-ring-info">
+      <span class="seg-ring-pct" style="color:${pctColor};font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:900;display:block;line-height:1;letter-spacing:-1px">${pct}%</span>
+      <span class="seg-ring-sub">${done} of ${total} done</span>
+    </div>
+    ${catLegend?`<div class="seg-ring-cats">${catLegend}</div>`:''}`;
+}
+
+// ── WEEKLY ────────────────────────────────────────────────
+function changeWeek(dir){ weekOffset+=dir; renderWeekly(); }
+function weekBadge(goals){ if(!goals.length)return`<span class="wg-badge empty">0 goals</span>`; const done=goals.filter(x=>x.done).length,cls=done===goals.length?'done-all':'in-prog'; return`<span class="wg-badge ${cls}">${done}/${goals.length}</span>`; }
+function toggleGroup(h){ h.closest('.week-group').classList.toggle('collapsed'); }
+
+function renderWeekly(){
+  const mon=weekMonday(TODAY,weekOffset);
+  const wk=weekKey(mon);
+  const allGoals=loadAll();
+  const ownWeekGoals=allGoals.filter(g=>g.type==='weekly'&&g.weekKey===wk);
+
+  document.getElementById('weekLabel').textContent=weekOffset===0?'This Week':weekRangeLabel(mon);
+  document.getElementById('wGoalsHeading').textContent=weekOffset===0?`This Week's Goals — ${weekRangeLabel(mon)}`:weekRangeLabel(mon);
+  setStats(['wS1','wS2','wS3'],ownWeekGoals,'wBar','wPct');
+  renderProgressVisual('wProgressVisual', ownWeekGoals, 'var(--cyan)');
+
+  const ownList=document.getElementById('weeklyOwnList');
+  const sortedOwn=[...ownWeekGoals].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1)||a.done-b.done);
+  ownList.innerHTML=sortedOwn.length?sortedOwn.map(goalItemHtml).join(''):`<div class="empty-state"><span class="empty-icon">📆</span><div class="empty-title">No weekly goals yet</div><div class="empty-sub">Add goals for this week using the form above</div></div>`;
+  updateFooter();
+}
+
+// ── MONTHLY ───────────────────────────────────────────────
+function changeMonth(dir){ monthOffset+=dir; renderMonthly(); }
+
+function renderMonthly(){
+  const refDate=new Date(TODAY.getFullYear(),TODAY.getMonth()+monthOffset,1);
+  const mk=monthKey(refDate);
+  document.getElementById('monthLabel').textContent=`${MONTHS_FULL[refDate.getMonth()]} ${refDate.getFullYear()}`;
+  document.getElementById('mGoalsHeading').textContent=`${MONTHS_FULL[refDate.getMonth()]} ${refDate.getFullYear()} Goals`;
+
+  const allGoals=loadAll();
+  const ownMonthGoals=allGoals.filter(g=>g.type==='monthly'&&g.monthKey===mk);
+
+  setStats(['mS1','mS2','mS3'],ownMonthGoals,'mBar','mPct');
+  renderProgressVisual('mProgressVisual', ownMonthGoals, 'var(--amber)');
+
+  const ownList=document.getElementById('monthlyOwnList');
+  const sortedOwn=[...ownMonthGoals].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]||1)-({high:0,medium:1,low:2}[b.priority]||1)||a.done-b.done);
+  ownList.innerHTML=sortedOwn.length?sortedOwn.map(goalItemHtml).join(''):`<div class="empty-state"><span class="empty-icon">🗓</span><div class="empty-title">No monthly goals yet</div><div class="empty-sub">Add big-picture goals for this month using the form above</div></div>`;
+  updateFooter();
+}
+
+function updateFooter(){
+  const all=loadAll();
+  const done=all.filter(x=>x.done).length;
+  const d=all.filter(x=>x.type==='daily').length;
+  const w=all.filter(x=>x.type==='weekly').length;
+  const m=all.filter(x=>x.type==='monthly').length;
+  document.getElementById('footStr').textContent=`${done}/${all.length} done  ·  ${d} daily  ${w} weekly  ${m} monthly`;
+}
+
+// Enter key shortcuts
+['dTitle','dNotes'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addDailyGoal();}));
+['wTitle','wNotes'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addWeeklyGoal();}));
+['mTitle','mNotes'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addMonthlyGoal();}));
+
+document.addEventListener('DOMContentLoaded',()=>{ renderDaily(); });
+</script>
+
+<!-- Shared scripts -->
+<script src="../js/data.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/ui.js"></script>
+</body>
+</html>

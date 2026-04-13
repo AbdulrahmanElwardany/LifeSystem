@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graduation Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #05050f;
+            --bg2:       #0a0a1a;
+            --bg3:       #0f0f22;
+            --green:     #00ff88;
+            --cyan:      #00e5ff;
+            --purple:    #9b5de5;
+            --amber:     #ffbe0b;
+            --border:    rgba(255,255,255,0.06);
+            --text:      #e0e0f0;
+            --muted:     #4a4a6a;
+            --mono:      'JetBrains Mono', monospace;
+            --display:   'Outfit', sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { font-family:var(--display); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+        .grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none;
+            background-image:linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+            background-size:60px 60px; mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%); }
+        .orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+        .orb-1 { width:700px; height:700px; background:radial-gradient(circle,rgba(155,93,229,0.08),transparent 70%); top:-200px; left:-200px; }
+        .orb-2 { width:500px; height:500px; background:radial-gradient(circle,rgba(0,229,255,0.07),transparent 70%); bottom:-100px; right:-100px; }
+        .orb-3 { width:400px; height:400px; background:radial-gradient(circle,rgba(0,255,136,0.06),transparent 70%); top:50%; left:60%; }
+        body::after { content:''; position:fixed; inset:0; z-index:999; pointer-events:none;
+            background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px); }
+
+        /* ── Sticky header ── */
+        .site-header { position:sticky; top:0; z-index:100; background:rgba(5,5,15,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:20px 32px; }
+        .header-inner { max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+
+        .back-btn { display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:0.7rem; letter-spacing:2px; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+        .back-btn:hover { color:var(--purple); }
+        .back-btn::before { content:'←'; }
+        .header-brand { font-family:var(--mono); font-size:0.65rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+        .header-status { display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:0.65rem; color:var(--purple); }
+        .status-dot { width:6px; height:6px; background:var(--purple); border-radius:50%; box-shadow:0 0 6px var(--purple); animation:pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+        .header-title-row { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+        .header-eyebrow { font-family:var(--mono); font-size:0.65rem; color:var(--purple); letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
+        .header-h1 { font-size:clamp(1.5rem,3.5vw,2.4rem); font-weight:900; letter-spacing:-1.5px; color:#fff; line-height:1; }
+        .header-h1 em { font-style:normal; background:linear-gradient(135deg,var(--purple),#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .header-sub { font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-top:6px; }
+
+        .header-progress-wrap { display:flex; align-items:center; gap:20px; flex-shrink:0; }
+        .prog-ring-wrap { position:relative; width:72px; height:72px; }
+        .prog-ring-wrap svg { width:72px; height:72px; transform:rotate(-90deg); }
+        .prog-ring-track { fill:none; stroke:rgba(255,255,255,0.05); stroke-width:6; }
+        .prog-ring-fill { fill:none; stroke:url(#hgp); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1); }
+        .prog-ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .prog-ring-pct { font-family:var(--mono); font-weight:800; font-size:0.9rem; color:var(--purple); line-height:1; }
+        .prog-ring-label { font-family:var(--mono); font-size:0.5rem; color:var(--muted); letter-spacing:1px; margin-top:1px; }
+        .prog-stats { display:flex; flex-direction:column; gap:4px; }
+        .prog-stat { font-family:var(--mono); font-size:0.68rem; color:var(--muted); }
+        .prog-stat span { color:var(--purple); font-weight:700; }
+
+        .progress-bar-wrap { position:relative; }
+        .progress-bar { height:3px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--purple),#ec4899); width:0%; transition:width 0.8s ease; border-radius:99px; }
+        .progress-text { font-family:var(--mono); font-size:0.62rem; color:var(--muted); margin-top:5px; text-align:right; }
+
+        /* ── Layout ── */
+        .wrap { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:40px 32px 100px; }
+
+        /* ── Phase section ── */
+        .phase-section { margin-bottom:16px; }
+        .phase-header {
+            display:flex; align-items:center; gap:16px; padding:18px 22px;
+            background:var(--bg2); border:1px solid var(--border); border-radius:16px;
+            cursor:pointer; transition:all 0.25s; position:relative; overflow:hidden; border-left:3px solid;
+        }
+        .phase-header::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,currentColor,transparent); opacity:0.04; pointer-events:none; }
+        .phase-header:hover { transform:translateX(3px); }
+
+        .phase-header.phase-1 { border-left-color:var(--green);  color:var(--green); }
+        .phase-header.phase-2 { border-left-color:var(--cyan);   color:var(--cyan); }
+        .phase-header.phase-3 { border-left-color:var(--purple); color:var(--purple); }
+
+        .phase-header.phase-1:hover { border-color:rgba(0,255,136,0.3);   box-shadow:0 8px 32px rgba(0,255,136,0.06); }
+        .phase-header.phase-2:hover { border-color:rgba(0,229,255,0.3);   box-shadow:0 8px 32px rgba(0,229,255,0.06); }
+        .phase-header.phase-3:hover { border-color:rgba(155,93,229,0.3);  box-shadow:0 8px 32px rgba(155,93,229,0.06); }
+
+        .phase-number { width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:800; font-size:1rem; color:#05050f; }
+        .phase-1 .phase-number { background:linear-gradient(135deg,var(--green),var(--cyan)); }
+        .phase-2 .phase-number { background:linear-gradient(135deg,var(--cyan),var(--purple)); }
+        .phase-3 .phase-number { background:linear-gradient(135deg,var(--purple),#ec4899); color:#fff; }
+
+        .phase-info { flex:1; }
+        .phase-info h2 { font-size:1rem; font-weight:700; color:#fff; margin-bottom:3px; }
+        .phase-info p  { font-family:var(--mono); font-size:0.65rem; color:var(--muted); }
+        .phase-progress { font-family:var(--mono); font-size:0.7rem; color:var(--muted); white-space:nowrap; }
+        .phase-progress .phase-completed { color:currentColor; font-weight:700; }
+        .phase-toggle { font-size:0.75rem; color:var(--muted); margin-left:8px; transition:transform 0.3s; flex-shrink:0; }
+        .phase-section.collapsed .phase-toggle { transform:rotate(-90deg); }
+
+        .tree-content { margin-left:22px; border-left:1px solid rgba(255,255,255,0.06); padding-left:22px; overflow:hidden; transition:max-height 0.5s ease; margin-top:4px; }
+        .phase-section.collapsed .tree-content { max-height:0 !important; padding:0; margin:0; }
+
+        /* ── Video item ── */
+        .video-item { position:relative; display:flex; align-items:center; padding:11px 14px; margin:4px 0; background:var(--bg3); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.2s; }
+        .video-item::before { content:''; position:absolute; left:-23px; width:22px; height:1px; background:rgba(255,255,255,0.06); }
+        .video-item:hover { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); transform:translateX(4px); }
+        .video-item.completed { background:rgba(155,93,229,0.07); border-color:rgba(155,93,229,0.25); }
+        .video-item.completed .video-title { color:var(--purple); }
+        .video-item.completed .video-checkbox { background:var(--purple); border-color:var(--purple); }
+        .video-item.completed .video-checkbox::after { content:'✓'; color:#fff; font-weight:900; font-size:0.72rem; }
+
+        .video-checkbox { width:20px; height:20px; border:1.5px solid var(--muted); border-radius:5px; margin-right:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+        .video-title { font-family:var(--display); font-size:0.88rem; color:var(--text); flex-grow:1; }
+        .quiz-icon { font-family:var(--mono); font-size:0.62rem; letter-spacing:1px; padding:3px 8px; border-radius:6px; background:rgba(155,93,229,0.15); color:var(--purple); border:1px solid rgba(155,93,229,0.2); margin-left:8px; flex-shrink:0; }
+
+        /* ── Footer ── */
+        .foot { border-top:1px solid var(--border); padding-top:24px; margin-top:40px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+        .foot-l { font-family:var(--mono); font-size:0.65rem; color:var(--muted); }
+        .foot-r { font-family:var(--mono); font-size:0.65rem; color:var(--purple); }
+
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .anim { opacity:0; animation:slideUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .d1{animation-delay:0.1s} .d2{animation-delay:0.18s} .d3{animation-delay:0.26s}
+
+        @media(max-width:600px) { .site-header{padding:16px 18px} .wrap{padding:24px 18px 80px} .header-progress-wrap{display:none} }
+    </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="site-header">
+    <div class="header-inner">
+        <div class="header-top">
+            <a href="overall-progress.html" class="back-btn"> &nbsp;BACK</a>
+            <div style="display:flex;align-items:center;gap:20px;">
+                <span class="header-brand">LEARNING OS / COURSE 03</span>
+                <span class="header-status"><span class="status-dot"></span>TRACKING</span>
+            </div>
+        </div>
+        <div class="header-title-row">
+            <div>
+                <div class="header-eyebrow">Go Automation</div>
+                <h1 class="header-h1">GRADUATION <em>PROJECT</em></h1>
+                <p class="header-sub">// Master automation tools and techniques for ethical hacking</p>
+            </div>
+            <div class="header-progress-wrap">
+                <div class="prog-ring-wrap">
+                    <svg viewBox="0 0 72 72">
+                        <defs>
+                            <linearGradient id="hgp" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#9b5de5"/>
+                                <stop offset="100%" stop-color="#ec4899"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="prog-ring-track" cx="36" cy="36" r="28"/>
+                        <circle class="prog-ring-fill" id="ringFill" cx="36" cy="36" r="28" stroke-dasharray="175.93" stroke-dashoffset="175.93"/>
+                    </svg>
+                    <div class="prog-ring-inner">
+                        <div class="prog-ring-pct" id="ringPct">0%</div>
+                        <div class="prog-ring-label">DONE</div>
+                    </div>
+                </div>
+                <div class="prog-stats">
+                    <div class="prog-stat"><span id="completedCount">0</span> completed</div>
+                    <div class="prog-stat"><span id="totalCount">0</span> total lessons</div>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">0 / 0 Lessons Completed</div>
+        </div>
+    </div>
+</div>
+
+<div class="wrap">
+
+    <!-- Section 1: Introduction -->
+    <div class="phase-section anim d1">
+        <div class="phase-header phase-1" onclick="togglePhase(this)">
+            <div class="phase-number">1</div>
+            <div class="phase-info"><h2>Introduction</h2><p>Getting started with the course structure and requirements</p></div>
+            <span class="phase-progress"><span class="phase-completed">0</span> / <span class="phase-total">1</span></span>
+            <span class="phase-toggle">▼</span>
+        </div>
+        <div class="tree-content">
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Intro to the Course Structure</span></div>
+        </div>
+    </div>
+
+    <!-- Section 2: Basics -->
+    <div class="phase-section anim d2">
+        <div class="phase-header phase-2" onclick="togglePhase(this)">
+            <div class="phase-number">2</div>
+            <div class="phase-info"><h2>Basics</h2><p>Core Go programming fundamentals for security automation</p></div>
+            <span class="phase-progress"><span class="phase-completed">0</span> / <span class="phase-total">11</span></span>
+            <span class="phase-toggle">▼</span>
+        </div>
+        <div class="tree-content">
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Setup</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Syntax - Part 1</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Syntax - Part 2</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Files</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">http</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Concurrency</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Logging</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Flags</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Project Structure</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Packages</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Regex</span></div>
+        </div>
+    </div>
+
+    <!-- Section 3: Assets Discovery -->
+    <div class="phase-section anim d3">
+        <div class="phase-header phase-3" onclick="togglePhase(this)">
+            <div class="phase-number">3</div>
+            <div class="phase-info"><h2>Assets Discovery</h2><p>Recon, enumeration and infrastructure mapping techniques</p></div>
+            <span class="phase-progress"><span class="phase-completed">0</span> / <span class="phase-total">5</span></span>
+            <span class="phase-toggle">▼</span>
+        </div>
+        <div class="tree-content">
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Essential Concepts</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Whois & Infrastructure Mapping</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Domain Enumeration</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">DNS Enumeration</span></div>
+            <div class="video-item" onclick="toggleVideo(this)"><div class="video-checkbox"></div><span class="video-title">Subdomain Enumeration</span></div>
+        </div>
+    </div>
+
+    <div class="foot">
+        <span class="foot-l">// Graduation Project — Go Automation for Ethical Hacking</span>
+        <span class="foot-r" id="footStr">loading...</span>
+    </div>
+
+</div>
+
+<script>
+    const LESSON_KEYS = [
+        'intro-course-structure',
+        'basics-setup','basics-syntax1','basics-syntax2','basics-files',
+        'basics-http','basics-concurrency','basics-logging','basics-flags',
+        'basics-project','basics-packages','basics-regex',
+        'assets-concepts','assets-whois','assets-domain','assets-dns','assets-subdomain'
+    ];
+    const LESSON_DEFAULTS = [
+        'done',
+        'done','done','done','done',
+        'done','done','done','done',
+        'done','done','start',
+        'done','done','start','start','start'
+    ];
+
+    function toggleVideo(element) {
+        element.classList.toggle('completed');
+        updatePhaseProgress(element);
+        saveProgress();
+        updateProgress();
+    }
+    function togglePhase(header) {
+        header.parentElement.classList.toggle('collapsed');
+        setTreeContentHeight();
+    }
+    function updatePhaseProgress(videoElement) {
+        const phase = videoElement.closest('.phase-section');
+        const ph = phase.querySelector('.phase-header');
+        ph.querySelector('.phase-completed').textContent = phase.querySelectorAll('.video-item.completed').length;
+        ph.querySelector('.phase-total').textContent = phase.querySelectorAll('.video-item').length;
+    }
+    function initializePhaseProgress() {
+        document.querySelectorAll('.phase-section').forEach(phase => {
+            const ph = phase.querySelector('.phase-header');
+            ph.querySelector('.phase-completed').textContent = phase.querySelectorAll('.video-item.completed').length;
+            ph.querySelector('.phase-total').textContent = phase.querySelectorAll('.video-item').length;
+        });
+    }
+    function saveProgress() {
+        const completedIndexes = [];
+        document.querySelectorAll('.video-item').forEach((item, i) => {
+            if (item.classList.contains('completed')) completedIndexes.push(i);
+        });
+        localStorage.setItem('graduationProgress2', JSON.stringify(completedIndexes));
+        const state = {};
+        document.querySelectorAll('.video-item').forEach((item, i) => {
+            if (LESSON_KEYS[i]) state[LESSON_KEYS[i]] = item.classList.contains('completed') ? 'done' : LESSON_DEFAULTS[i];
+        });
+        localStorage.setItem('graduationProgress', JSON.stringify(state));
+    }
+    function loadProgress() {
+        const saved = localStorage.getItem('graduationProgress2');
+        const items = document.querySelectorAll('.video-item');
+        if (saved) {
+            JSON.parse(saved).forEach(i => { if (items[i]) items[i].classList.add('completed'); });
+        } else {
+            const oldSaved = localStorage.getItem('graduationProgress');
+            if (oldSaved) {
+                const state = JSON.parse(oldSaved);
+                LESSON_KEYS.forEach((key, i) => { if (state[key] === 'done' && items[i]) items[i].classList.add('completed'); });
+            } else {
+                [0,1,2,3,4,5,6,7,8,9,10,12,13].forEach(i => { if (items[i]) items[i].classList.add('completed'); });
+            }
+        }
+        initializePhaseProgress();
+        updateProgress();
+    }
+    function updateProgress() {
+        const total = document.querySelectorAll('.video-item').length;
+        const completed = document.querySelectorAll('.video-item.completed').length;
+        const pct = total > 0 ? (completed / total) * 100 : 0;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('completedCount').textContent = completed;
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('progressText').textContent = `${completed} / ${total} Lessons Completed`;
+        document.getElementById('footStr').textContent = `${completed} of ${total} lessons · ${Math.round(pct)}%`;
+        const circ = 175.93;
+        const ring = document.getElementById('ringFill');
+        ring.style.strokeDasharray = circ;
+        ring.style.strokeDashoffset = circ - (pct / 100) * circ;
+        document.getElementById('ringPct').textContent = Math.round(pct) + '%';
+    }
+    function setTreeContentHeight() {
+        document.querySelectorAll('.tree-content').forEach(content => {
+            if (!content.parentElement.classList.contains('collapsed')) content.style.maxHeight = content.scrollHeight + 'px';
+        });
+    }
+    document.addEventListener('DOMContentLoaded', () => { loadProgress(); setTreeContentHeight(); });
+</script>
+
+<!-- Shared scripts -->
+<script src="../js/data.js"></script>
+<script src="../js/storage.js"></script>
+<script src="../js/ui.js"></script>
+</body>
+</html>
